@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -20,9 +20,10 @@ import com.liferay.akismet.util.AkismetConstants;
 import com.liferay.akismet.util.AkismetUtil;
 import com.liferay.akismet.util.PortletPropsKeys;
 import com.liferay.akismet.util.PrefsPortletPropsUtil;
+import com.liferay.compat.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.servlet.HttpHeaders;
+import com.liferay.portal.kernel.util.NotificationThreadLocal;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
@@ -55,11 +56,12 @@ public class AkismetWikiPageLocalServiceImpl
 			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		boolean enabled = isWikiEnabled(userId, nodeId, serviceContext);
+		int workflowAction = serviceContext.getWorkflowAction();
 
-		if (enabled) {
-			serviceContext.setWorkflowAction(
-				WorkflowConstants.ACTION_SAVE_DRAFT);
+		if (workflowAction == WorkflowConstants.ACTION_SAVE_DRAFT) {
+			return super.addPage(
+				userId, nodeId, title, content, summary, minorEdit,
+				serviceContext);
 		}
 
 		WikiPage page = super.addPage(
@@ -68,20 +70,33 @@ public class AkismetWikiPageLocalServiceImpl
 
 		AkismetData akismetData = updateAkismetData(page, serviceContext);
 
-		if (!enabled) {
+		if (!isWikiEnabled(userId, nodeId, serviceContext)) {
 			return page;
 		}
 
 		String akismetContent = page.getTitle() + "\n\n" + page.getContent();
 
-		int status = WorkflowConstants.STATUS_APPROVED;
-
-		if (AkismetUtil.isSpam(userId, akismetContent, akismetData)) {
-			status = WorkflowConstants.STATUS_DENIED;
+		if (!AkismetUtil.isSpam(userId, akismetContent, akismetData)) {
+			return super.updateStatus(
+				userId, page.getResourcePrimKey(),
+				WorkflowConstants.STATUS_APPROVED, serviceContext);
 		}
 
-		return super.updateStatus(
-			userId, page.getResourcePrimKey(), status, serviceContext);
+		boolean notificationEnabled = false;
+
+		try {
+			notificationEnabled = NotificationThreadLocal.isEnabled();
+
+			NotificationThreadLocal.setEnabled(false);
+
+			page.setSummary(AkismetConstants.WIKI_PAGE_PENDING_APPROVAL);
+			page.setStatus(WorkflowConstants.STATUS_APPROVED);
+
+			return super.updateWikiPage(page);
+		}
+		finally {
+			NotificationThreadLocal.setEnabled(notificationEnabled);
+		}
 	}
 
 	@Override
@@ -92,11 +107,12 @@ public class AkismetWikiPageLocalServiceImpl
 			ServiceContext serviceContext)
 		throws PortalException, SystemException {
 
-		boolean enabled = isWikiEnabled(userId, nodeId, serviceContext);
+		int workflowAction = serviceContext.getWorkflowAction();
 
-		if (enabled) {
-			serviceContext.setWorkflowAction(
-				WorkflowConstants.ACTION_SAVE_DRAFT);
+		if (workflowAction == WorkflowConstants.ACTION_SAVE_DRAFT) {
+			return super.updatePage(
+				userId, nodeId, title, version, content, summary, minorEdit,
+				format, parentTitle, redirectTitle, serviceContext);
 		}
 
 		WikiPage page = super.updatePage(
@@ -105,20 +121,48 @@ public class AkismetWikiPageLocalServiceImpl
 
 		AkismetData akismetData = updateAkismetData(page, serviceContext);
 
-		if (!enabled) {
+		if (!isWikiEnabled(userId, nodeId, serviceContext)) {
 			return page;
 		}
 
 		String akismetContent = page.getTitle() + "\n\n" + page.getContent();
 
-		int status = WorkflowConstants.STATUS_APPROVED;
-
-		if (AkismetUtil.isSpam(userId, akismetContent, akismetData)) {
-			status = WorkflowConstants.STATUS_DENIED;
+		if (!AkismetUtil.isSpam(userId, akismetContent, akismetData)) {
+			return super.updateStatus(
+				userId, page.getResourcePrimKey(),
+				WorkflowConstants.STATUS_APPROVED, serviceContext);
 		}
 
-		return super.updateStatus(
-			userId, page.getResourcePrimKey(), status, serviceContext);
+		boolean notificationEnabled = false;
+
+		try {
+			notificationEnabled = NotificationThreadLocal.isEnabled();
+
+			NotificationThreadLocal.setEnabled(false);
+
+			page.setSummary(AkismetConstants.WIKI_PAGE_PENDING_APPROVAL);
+			page.setStatus(WorkflowConstants.STATUS_APPROVED);
+
+			page = super.updateWikiPage(page);
+
+			WikiPage previousPage = AkismetUtil.getWikiPage(
+				page.getNodeId(), page.getTitle(), page.getVersion(), true);
+
+			if (previousPage == null) {
+				return page;
+			}
+
+			ServiceContext newServiceContext = new ServiceContext();
+
+			newServiceContext.setFormDate(page.getModifiedDate());
+
+			return super.revertPage(
+				userId, nodeId, title, previousPage.getVersion(),
+				newServiceContext);
+		}
+		finally {
+			NotificationThreadLocal.setEnabled(notificationEnabled);
+		}
 	}
 
 	protected String getPermalink(

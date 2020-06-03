@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -70,9 +70,10 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 			{ "classNameId", Types.BIGINT },
 			{ "classPK", Types.BIGINT },
 			{ "type_", Types.INTEGER },
+			{ "extraData", Types.VARCHAR },
 			{ "activityCount", Types.INTEGER }
 		};
-	public static final String TABLE_SQL_CREATE = "create table SocialActivitySet (activitySetId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,createDate LONG,modifiedDate LONG,classNameId LONG,classPK LONG,type_ INTEGER,activityCount INTEGER)";
+	public static final String TABLE_SQL_CREATE = "create table SocialActivitySet (activitySetId LONG not null primary key,groupId LONG,companyId LONG,userId LONG,createDate LONG,modifiedDate LONG,classNameId LONG,classPK LONG,type_ INTEGER,extraData STRING null,activityCount INTEGER)";
 	public static final String TABLE_SQL_DROP = "drop table SocialActivitySet";
 	public static final String ORDER_BY_JPQL = " ORDER BY socialActivitySet.modifiedDate DESC";
 	public static final String ORDER_BY_SQL = " ORDER BY SocialActivitySet.modifiedDate DESC";
@@ -85,7 +86,14 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 	public static final boolean FINDER_CACHE_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
 				"value.object.finder.cache.enabled.com.liferay.so.activities.model.SocialActivitySet"),
 			true);
-	public static final boolean COLUMN_BITMASK_ENABLED = false;
+	public static final boolean COLUMN_BITMASK_ENABLED = GetterUtil.getBoolean(com.liferay.util.service.ServiceProps.get(
+				"value.object.column.bitmask.enabled.com.liferay.so.activities.model.SocialActivitySet"),
+			true);
+	public static long CLASSNAMEID_COLUMN_BITMASK = 1L;
+	public static long CLASSPK_COLUMN_BITMASK = 2L;
+	public static long GROUPID_COLUMN_BITMASK = 4L;
+	public static long TYPE_COLUMN_BITMASK = 8L;
+	public static long USERID_COLUMN_BITMASK = 16L;
 	public static final long LOCK_EXPIRATION_TIME = GetterUtil.getLong(com.liferay.util.service.ServiceProps.get(
 				"lock.expiration.time.com.liferay.so.activities.model.SocialActivitySet"));
 
@@ -129,6 +137,7 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 		attributes.put("classNameId", getClassNameId());
 		attributes.put("classPK", getClassPK());
 		attributes.put("type", getType());
+		attributes.put("extraData", getExtraData());
 		attributes.put("activityCount", getActivityCount());
 
 		return attributes;
@@ -190,6 +199,12 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 			setType(type);
 		}
 
+		String extraData = (String)attributes.get("extraData");
+
+		if (extraData != null) {
+			setExtraData(extraData);
+		}
+
 		Integer activityCount = (Integer)attributes.get("activityCount");
 
 		if (activityCount != null) {
@@ -210,7 +225,19 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 	}
 
 	public void setGroupId(long groupId) {
+		_columnBitmask |= GROUPID_COLUMN_BITMASK;
+
+		if (!_setOriginalGroupId) {
+			_setOriginalGroupId = true;
+
+			_originalGroupId = _groupId;
+		}
+
 		_groupId = groupId;
+	}
+
+	public long getOriginalGroupId() {
+		return _originalGroupId;
 	}
 
 	public long getCompanyId() {
@@ -226,6 +253,14 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 	}
 
 	public void setUserId(long userId) {
+		_columnBitmask |= USERID_COLUMN_BITMASK;
+
+		if (!_setOriginalUserId) {
+			_setOriginalUserId = true;
+
+			_originalUserId = _userId;
+		}
+
 		_userId = userId;
 	}
 
@@ -235,6 +270,10 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 
 	public void setUserUuid(String userUuid) {
 		_userUuid = userUuid;
+	}
+
+	public long getOriginalUserId() {
+		return _originalUserId;
 	}
 
 	public long getCreateDate() {
@@ -250,6 +289,8 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 	}
 
 	public void setModifiedDate(long modifiedDate) {
+		_columnBitmask = -1L;
+
 		_modifiedDate = modifiedDate;
 	}
 
@@ -276,7 +317,19 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 	}
 
 	public void setClassNameId(long classNameId) {
+		_columnBitmask |= CLASSNAMEID_COLUMN_BITMASK;
+
+		if (!_setOriginalClassNameId) {
+			_setOriginalClassNameId = true;
+
+			_originalClassNameId = _classNameId;
+		}
+
 		_classNameId = classNameId;
+	}
+
+	public long getOriginalClassNameId() {
+		return _originalClassNameId;
 	}
 
 	public long getClassPK() {
@@ -284,7 +337,19 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 	}
 
 	public void setClassPK(long classPK) {
+		_columnBitmask |= CLASSPK_COLUMN_BITMASK;
+
+		if (!_setOriginalClassPK) {
+			_setOriginalClassPK = true;
+
+			_originalClassPK = _classPK;
+		}
+
 		_classPK = classPK;
+	}
+
+	public long getOriginalClassPK() {
+		return _originalClassPK;
 	}
 
 	public int getType() {
@@ -292,7 +357,32 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 	}
 
 	public void setType(int type) {
+		_columnBitmask |= TYPE_COLUMN_BITMASK;
+
+		if (!_setOriginalType) {
+			_setOriginalType = true;
+
+			_originalType = _type;
+		}
+
 		_type = type;
+	}
+
+	public int getOriginalType() {
+		return _originalType;
+	}
+
+	public String getExtraData() {
+		if (_extraData == null) {
+			return StringPool.BLANK;
+		}
+		else {
+			return _extraData;
+		}
+	}
+
+	public void setExtraData(String extraData) {
+		_extraData = extraData;
 	}
 
 	public int getActivityCount() {
@@ -301,6 +391,10 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 
 	public void setActivityCount(int activityCount) {
 		_activityCount = activityCount;
+	}
+
+	public long getColumnBitmask() {
+		return _columnBitmask;
 	}
 
 	@Override
@@ -343,6 +437,7 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 		socialActivitySetImpl.setClassNameId(getClassNameId());
 		socialActivitySetImpl.setClassPK(getClassPK());
 		socialActivitySetImpl.setType(getType());
+		socialActivitySetImpl.setExtraData(getExtraData());
 		socialActivitySetImpl.setActivityCount(getActivityCount());
 
 		socialActivitySetImpl.resetOriginalValues();
@@ -374,18 +469,15 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof SocialActivitySet)) {
 			return false;
 		}
 
-		SocialActivitySet socialActivitySet = null;
-
-		try {
-			socialActivitySet = (SocialActivitySet)obj;
-		}
-		catch (ClassCastException cce) {
-			return false;
-		}
+		SocialActivitySet socialActivitySet = (SocialActivitySet)obj;
 
 		long primaryKey = socialActivitySet.getPrimaryKey();
 
@@ -404,6 +496,29 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 
 	@Override
 	public void resetOriginalValues() {
+		SocialActivitySetModelImpl socialActivitySetModelImpl = this;
+
+		socialActivitySetModelImpl._originalGroupId = socialActivitySetModelImpl._groupId;
+
+		socialActivitySetModelImpl._setOriginalGroupId = false;
+
+		socialActivitySetModelImpl._originalUserId = socialActivitySetModelImpl._userId;
+
+		socialActivitySetModelImpl._setOriginalUserId = false;
+
+		socialActivitySetModelImpl._originalClassNameId = socialActivitySetModelImpl._classNameId;
+
+		socialActivitySetModelImpl._setOriginalClassNameId = false;
+
+		socialActivitySetModelImpl._originalClassPK = socialActivitySetModelImpl._classPK;
+
+		socialActivitySetModelImpl._setOriginalClassPK = false;
+
+		socialActivitySetModelImpl._originalType = socialActivitySetModelImpl._type;
+
+		socialActivitySetModelImpl._setOriginalType = false;
+
+		socialActivitySetModelImpl._columnBitmask = 0;
 	}
 
 	@Override
@@ -428,6 +543,14 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 
 		socialActivitySetCacheModel.type = getType();
 
+		socialActivitySetCacheModel.extraData = getExtraData();
+
+		String extraData = socialActivitySetCacheModel.extraData;
+
+		if ((extraData != null) && (extraData.length() == 0)) {
+			socialActivitySetCacheModel.extraData = null;
+		}
+
 		socialActivitySetCacheModel.activityCount = getActivityCount();
 
 		return socialActivitySetCacheModel;
@@ -435,7 +558,7 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(21);
+		StringBundler sb = new StringBundler(23);
 
 		sb.append("{activitySetId=");
 		sb.append(getActivitySetId());
@@ -455,6 +578,8 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 		sb.append(getClassPK());
 		sb.append(", type=");
 		sb.append(getType());
+		sb.append(", extraData=");
+		sb.append(getExtraData());
 		sb.append(", activityCount=");
 		sb.append(getActivityCount());
 		sb.append("}");
@@ -463,7 +588,7 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 	}
 
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(34);
+		StringBundler sb = new StringBundler(37);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.so.activities.model.SocialActivitySet");
@@ -506,6 +631,10 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 		sb.append(getType());
 		sb.append("]]></column-value></column>");
 		sb.append(
+			"<column><column-name>extraData</column-name><column-value><![CDATA[");
+		sb.append(getExtraData());
+		sb.append("]]></column-value></column>");
+		sb.append(
 			"<column><column-name>activityCount</column-name><column-value><![CDATA[");
 		sb.append(getActivityCount());
 		sb.append("]]></column-value></column>");
@@ -521,14 +650,26 @@ public class SocialActivitySetModelImpl extends BaseModelImpl<SocialActivitySet>
 		};
 	private long _activitySetId;
 	private long _groupId;
+	private long _originalGroupId;
+	private boolean _setOriginalGroupId;
 	private long _companyId;
 	private long _userId;
 	private String _userUuid;
+	private long _originalUserId;
+	private boolean _setOriginalUserId;
 	private long _createDate;
 	private long _modifiedDate;
 	private long _classNameId;
+	private long _originalClassNameId;
+	private boolean _setOriginalClassNameId;
 	private long _classPK;
+	private long _originalClassPK;
+	private boolean _setOriginalClassPK;
 	private int _type;
+	private int _originalType;
+	private boolean _setOriginalType;
+	private String _extraData;
 	private int _activityCount;
+	private long _columnBitmask;
 	private SocialActivitySet _escapedModel;
 }

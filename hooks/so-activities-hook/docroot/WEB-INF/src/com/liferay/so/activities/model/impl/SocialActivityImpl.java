@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -26,11 +26,60 @@ public class SocialActivityImpl extends SocialActivityBaseImpl {
 	public SocialActivityImpl() {
 	}
 
+	public String getClassName() throws PortalException, SystemException {
+		com.liferay.portlet.social.model.SocialActivity socialActivity =
+			getPortalSocialActivity();
+
+		return socialActivity.getClassName();
+	}
+
+	public long getClassNameId() throws PortalException, SystemException {
+		com.liferay.portlet.social.model.SocialActivity socialActivity =
+			getPortalSocialActivity();
+
+		return socialActivity.getClassNameId();
+	}
+
+	public long getClassPK() throws PortalException, SystemException {
+		com.liferay.portlet.social.model.SocialActivity socialActivity =
+			getPortalSocialActivity();
+
+		return socialActivity.getClassPK();
+	}
+
+	public long getCompanyId() throws PortalException, SystemException {
+		com.liferay.portlet.social.model.SocialActivity socialActivity =
+			getPortalSocialActivity();
+
+		return socialActivity.getCompanyId();
+	}
+
+	public long getCreateDate() throws PortalException, SystemException {
+		com.liferay.portlet.social.model.SocialActivity socialActivity =
+			getPortalSocialActivity();
+
+		return socialActivity.getCreateDate();
+	}
+
+	public String getExtraData() throws PortalException, SystemException {
+		com.liferay.portlet.social.model.SocialActivity socialActivity =
+			getPortalSocialActivity();
+
+		return socialActivity.getExtraData();
+	}
+
 	public long getGroupId() throws PortalException, SystemException {
 		com.liferay.portlet.social.model.SocialActivity socialActivity =
 			getPortalSocialActivity();
 
 		return socialActivity.getGroupId();
+	}
+
+	public long getMirrorActivityId() throws PortalException, SystemException {
+		com.liferay.portlet.social.model.SocialActivity socialActivity =
+			getPortalSocialActivity();
+
+		return socialActivity.getMirrorActivityId();
 	}
 
 	public com.liferay.portlet.social.model.SocialActivity
@@ -43,6 +92,27 @@ public class SocialActivityImpl extends SocialActivityBaseImpl {
 		}
 
 		return _socialActivity;
+	}
+
+	public long getReceiverUserId() throws PortalException, SystemException {
+		com.liferay.portlet.social.model.SocialActivity socialActivity =
+			getPortalSocialActivity();
+
+		return socialActivity.getReceiverUserId();
+	}
+
+	public int getType() throws PortalException, SystemException {
+		com.liferay.portlet.social.model.SocialActivity socialActivity =
+			getPortalSocialActivity();
+
+		return socialActivity.getType();
+	}
+
+	public long getUserId() throws PortalException, SystemException {
+		com.liferay.portlet.social.model.SocialActivity socialActivity =
+			getPortalSocialActivity();
+
+		return socialActivity.getUserId();
 	}
 
 	private com.liferay.portlet.social.model.SocialActivity _socialActivity;

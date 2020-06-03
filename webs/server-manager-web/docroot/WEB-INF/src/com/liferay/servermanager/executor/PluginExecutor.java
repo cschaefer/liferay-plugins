@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,7 @@
 
 package com.liferay.servermanager.executor;
 
+import com.liferay.compat.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.deploy.DeployManagerUtil;
 import com.liferay.portal.kernel.deploy.auto.context.AutoDeploymentContext;
 import com.liferay.portal.kernel.json.JSONArray;
@@ -253,6 +254,7 @@ public class PluginExecutor extends BaseExecutor {
 			File[] tempContextDirs = tempDir.listFiles(
 				new FilenameFilter() {
 
+					@Override
 					public boolean accept(File dir, String name) {
 						if (name.endsWith("-" + context)) {
 							return true;
@@ -264,11 +266,12 @@ public class PluginExecutor extends BaseExecutor {
 				}
 			);
 
-			if ((tempContextDirs != null) && (tempContextDirs.length > 0)) {
+			if (ArrayUtil.isNotEmpty(tempContextDirs)) {
 				Arrays.sort(
 					tempContextDirs,
 					new Comparator<File>() {
 
+						@Override
 						public int compare(File file1, File file2) {
 							String fileName1 = file1.getName();
 							String fileName2 = file2.getName();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -249,27 +249,89 @@ public interface SocialActivitySetLocalService extends BaseLocalService,
 		throws java.lang.Throwable;
 
 	public com.liferay.so.activities.model.SocialActivitySet addActivitySet(
-		long userId, long activityId, java.lang.String className, long classPK,
-		int type)
+		long activityId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
-	public com.liferay.so.activities.model.SocialActivitySet decrementActivityCount(
-		long activitySetId)
+	public void decrementActivityCount(long activitySetId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 
-	public com.liferay.so.activities.model.SocialActivitySet deleteActivitySet(
-		long activitySetId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException;
-
-	public com.liferay.so.activities.model.SocialActivitySet deleteActivitySet(
-		com.liferay.so.activities.model.SocialActivitySet activitySet)
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public com.liferay.so.activities.model.SocialActivitySet getClassActivitySet(
+		long classNameId, long classPK, int type)
 		throws com.liferay.portal.kernel.exception.SystemException;
 
-	public com.liferay.so.activities.model.SocialActivitySet incrementActivityCount(
-		long activitySetId)
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public com.liferay.so.activities.model.SocialActivitySet getClassActivitySet(
+		long userId, long classNameId, long classPK, int type)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getGroupActivitySets(
+		long groupId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getGroupActivitySetsCount(long groupId)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getRelationActivitySets(
+		long userId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getRelationActivitySets(
+		long userId, int type, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getRelationActivitySetsCount(long userId)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getRelationActivitySetsCount(long userId, int type)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public com.liferay.so.activities.model.SocialActivitySet getUserActivitySet(
+		long groupId, long userId, int type)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public com.liferay.so.activities.model.SocialActivitySet getUserActivitySet(
+		long groupId, long userId, long classNameId, int type)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getUserActivitySets(
+		long userId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getUserActivitySetsCount(long userId)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getUserGroupsActivitySets(
+		long userId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getUserGroupsActivitySetsCount(long userId)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getUserViewableActivitySets(
+		long userId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+	public int getUserViewableActivitySetsCount(long userId)
+		throws com.liferay.portal.kernel.exception.SystemException;
+
+	public void incrementActivityCount(long activitySetId, long activityId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException;
 }

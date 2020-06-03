@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,11 @@
 
 package com.liferay.webform.portlet;
 
+import com.liferay.compat.portal.kernel.portlet.PortletResponseUtil;
+import com.liferay.compat.portal.kernel.util.LocalizationUtil;
+import com.liferay.compat.portal.kernel.util.StringUtil;
+import com.liferay.compat.portal.util.PortalUtil;
+import com.liferay.compat.util.bridges.mvc.MVCPortlet;
 import com.liferay.counter.service.CounterLocalServiceUtil;
 import com.liferay.mail.service.MailServiceUtil;
 import com.liferay.portal.kernel.captcha.CaptchaTextException;
@@ -22,29 +27,24 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.mail.MailMessage;
-import com.liferay.portal.kernel.portlet.PortletResponseUtil;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
-import com.liferay.portal.kernel.util.LocalizationUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.service.permission.PortletPermissionUtil;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.PortletPreferencesFactoryUtil;
 import com.liferay.portlet.expando.model.ExpandoRow;
 import com.liferay.portlet.expando.service.ExpandoRowLocalServiceUtil;
 import com.liferay.portlet.expando.service.ExpandoTableLocalServiceUtil;
 import com.liferay.portlet.expando.service.ExpandoValueLocalServiceUtil;
-import com.liferay.util.bridges.mvc.MVCPortlet;
 import com.liferay.webform.util.PortletPropsValues;
 import com.liferay.webform.util.WebFormUtil;
 
@@ -198,6 +198,10 @@ public class WebFormPortlet extends MVCPortlet {
 			}
 
 			if (saveToFile) {
+				if (!PortletPropsValues.DATA_FILE_PATH_CHANGEABLE) {
+					fileName = WebFormUtil.getFileName(themeDisplay, portletId);
+				}
+
 				fileSuccess = saveFile(fieldsMap, fileName);
 			}
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -31,29 +31,21 @@ public class AppServiceClp implements AppService {
 
 		_methodParameterTypes1 = new String[] { "java.lang.String" };
 
-		_methodName3 = "addApp";
+		_methodName3 = "deleteApp";
 
-		_methodParameterTypes3 = new String[] {
-				"long", "java.lang.String", "java.io.File"
-			};
+		_methodParameterTypes3 = new String[] { "long" };
 
-		_methodName4 = "deleteApp";
+		_methodName4 = "installApp";
 
 		_methodParameterTypes4 = new String[] { "long" };
 
-		_methodName5 = "installApp";
+		_methodName5 = "uninstallApp";
 
 		_methodParameterTypes5 = new String[] { "long" };
 
-		_methodName6 = "uninstallApp";
+		_methodName6 = "updateApp";
 
-		_methodParameterTypes6 = new String[] { "long" };
-
-		_methodName7 = "updateApp";
-
-		_methodParameterTypes7 = new String[] {
-				"long", "java.lang.String", "java.io.File"
-			};
+		_methodParameterTypes6 = new String[] { "java.io.File" };
 	}
 
 	public java.lang.String getBeanIdentifier() {
@@ -103,54 +95,14 @@ public class AppServiceClp implements AppService {
 		throw new UnsupportedOperationException();
 	}
 
-	public com.liferay.marketplace.model.App addApp(long remoteAppId,
-		java.lang.String version, java.io.File file)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		Object returnObj = null;
-
-		try {
-			returnObj = _invokableService.invokeMethod(_methodName3,
-					_methodParameterTypes3,
-					new Object[] {
-						remoteAppId,
-						
-					ClpSerializer.translateInput(version),
-						
-					ClpSerializer.translateInput(file)
-					});
-		}
-		catch (Throwable t) {
-			t = ClpSerializer.translateThrowable(t);
-
-			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
-				throw (com.liferay.portal.kernel.exception.PortalException)t;
-			}
-
-			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
-				throw (com.liferay.portal.kernel.exception.SystemException)t;
-			}
-
-			if (t instanceof RuntimeException) {
-				throw (RuntimeException)t;
-			}
-			else {
-				throw new RuntimeException(t.getClass().getName() +
-					" is not a valid exception");
-			}
-		}
-
-		return (com.liferay.marketplace.model.App)ClpSerializer.translateOutput(returnObj);
-	}
-
 	public com.liferay.marketplace.model.App deleteApp(long appId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
 		try {
-			returnObj = _invokableService.invokeMethod(_methodName4,
-					_methodParameterTypes4, new Object[] { appId });
+			returnObj = _invokableService.invokeMethod(_methodName3,
+					_methodParameterTypes3, new Object[] { appId });
 		}
 		catch (Throwable t) {
 			t = ClpSerializer.translateThrowable(t);
@@ -179,8 +131,8 @@ public class AppServiceClp implements AppService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		try {
-			_invokableService.invokeMethod(_methodName5,
-				_methodParameterTypes5, new Object[] { remoteAppId });
+			_invokableService.invokeMethod(_methodName4,
+				_methodParameterTypes4, new Object[] { remoteAppId });
 		}
 		catch (Throwable t) {
 			t = ClpSerializer.translateThrowable(t);
@@ -207,8 +159,8 @@ public class AppServiceClp implements AppService {
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		try {
-			_invokableService.invokeMethod(_methodName6,
-				_methodParameterTypes6, new Object[] { remoteAppId });
+			_invokableService.invokeMethod(_methodName5,
+				_methodParameterTypes5, new Object[] { remoteAppId });
 		}
 		catch (Throwable t) {
 			t = ClpSerializer.translateThrowable(t);
@@ -231,22 +183,15 @@ public class AppServiceClp implements AppService {
 		}
 	}
 
-	public com.liferay.marketplace.model.App updateApp(long appId,
-		java.lang.String version, java.io.File file)
+	public com.liferay.marketplace.model.App updateApp(java.io.File file)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
 		try {
-			returnObj = _invokableService.invokeMethod(_methodName7,
-					_methodParameterTypes7,
-					new Object[] {
-						appId,
-						
-					ClpSerializer.translateInput(version),
-						
-					ClpSerializer.translateInput(file)
-					});
+			returnObj = _invokableService.invokeMethod(_methodName6,
+					_methodParameterTypes6,
+					new Object[] { ClpSerializer.translateInput(file) });
 		}
 		catch (Throwable t) {
 			t = ClpSerializer.translateThrowable(t);
@@ -284,6 +229,4 @@ public class AppServiceClp implements AppService {
 	private String[] _methodParameterTypes5;
 	private String _methodName6;
 	private String[] _methodParameterTypes6;
-	private String _methodName7;
-	private String[] _methodParameterTypes7;
 }

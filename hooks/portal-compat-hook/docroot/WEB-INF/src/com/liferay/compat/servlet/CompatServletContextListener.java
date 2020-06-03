@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -17,18 +17,17 @@ package com.liferay.compat.servlet;
 import com.liferay.compat.hook.repository.cmis.CompatCMISRepositoryFactoryInvocationHandler;
 import com.liferay.compat.hook.sharepoint.CompatSharepointInvocationHandler;
 import com.liferay.compat.hook.webdav.CompatDLWebDAVStorageImpl;
+import com.liferay.compat.portal.kernel.util.ClassUtil;
 import com.liferay.compat.util.CompatConstants;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.BasePortalLifecycle;
-import com.liferay.portal.kernel.util.ClassUtil;
 import com.liferay.portal.kernel.util.PortalClassLoaderUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.webdav.WebDAVStorage;
 import com.liferay.portal.kernel.webdav.WebDAVStorageWrapper;
 import com.liferay.portal.kernel.webdav.WebDAVUtil;
 
-import java.lang.Object;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -47,10 +46,12 @@ import javax.servlet.ServletContextListener;
 public class CompatServletContextListener
 	extends BasePortalLifecycle implements ServletContextListener {
 
+	@Override
 	public void contextDestroyed(ServletContextEvent servletContextEvent) {
 		portalDestroy();
 	}
 
+	@Override
 	public void contextInitialized(ServletContextEvent servletContextEvent) {
 		registerPortalLifecycle();
 	}

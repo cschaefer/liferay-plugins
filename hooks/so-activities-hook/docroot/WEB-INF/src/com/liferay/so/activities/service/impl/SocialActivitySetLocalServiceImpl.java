@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,11 +16,12 @@ package com.liferay.so.activities.service.impl;
 
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.model.User;
-import com.liferay.portlet.social.model.SocialActivity;
-import com.liferay.portlet.social.service.SocialActivityLocalServiceUtil;
+import com.liferay.so.activities.model.SocialActivity;
 import com.liferay.so.activities.model.SocialActivitySet;
 import com.liferay.so.activities.service.base.SocialActivitySetLocalServiceBaseImpl;
+import com.liferay.so.activities.util.comparator.SocialActivitySetModifiedDateComparator;
+
+import java.util.List;
 
 /**
  * @author Jonathan Lee
@@ -28,14 +29,12 @@ import com.liferay.so.activities.service.base.SocialActivitySetLocalServiceBaseI
 public class SocialActivitySetLocalServiceImpl
 	extends SocialActivitySetLocalServiceBaseImpl {
 
-	public SocialActivitySet addActivitySet(
-			long userId, long activityId, String className, long classPK,
-			int type)
+	public SocialActivitySet addActivitySet(long activityId)
 		throws PortalException, SystemException {
 
-		User user = userPersistence.findByPrimaryKey(userId);
+		// Activity set
 
-		SocialActivity activity = SocialActivityLocalServiceUtil.getActivity(
+		SocialActivity activity = socialActivityPersistence.findByPrimaryKey(
 			activityId);
 
 		long activitySetId = counterLocalService.increment();
@@ -43,63 +42,185 @@ public class SocialActivitySetLocalServiceImpl
 		SocialActivitySet activitySet = socialActivitySetPersistence.create(
 			activitySetId);
 
-		activitySet.setActivitySetId(activity.getActivityId());
-		activitySet.setCompanyId(user.getCompanyId());
-		activitySet.setUserId(userId);
+		activitySet.setGroupId(activity.getGroupId());
+		activitySet.setCompanyId(activity.getCompanyId());
+		activitySet.setUserId(activity.getUserId());
 		activitySet.setCreateDate(activity.getCreateDate());
 		activitySet.setModifiedDate(activity.getCreateDate());
-		activitySet.setClassName(className);
-		activitySet.setClassPK(classPK);
-		activitySet.setType(type);
-		activitySet.setActivityCount(0);
+		activitySet.setClassName(activity.getClassName());
+		activitySet.setClassPK(activity.getClassPK());
+		activitySet.setType(activity.getType());
+		activitySet.setActivityCount(1);
 
 		socialActivitySetPersistence.update(activitySet, false);
 
-		socialActivityLocalService.addActivity(
-			activitySet.getActivitySetId(), activityId);
+		// Activity
+
+		activity.setActivitySetId(activitySetId);
+
+		socialActivityPersistence.update(activity, false);
 
 		return activitySet;
 	}
 
-	public SocialActivitySet decrementActivityCount(long activitySetId)
+	public void decrementActivityCount(long activitySetId)
 		throws PortalException, SystemException {
 
-		SocialActivitySet socialActivitySet =
+		if (activitySetId == 0) {
+			return;
+		}
+
+		SocialActivitySet activitySet =
 			socialActivitySetPersistence.findByPrimaryKey(activitySetId);
 
-		socialActivitySet.setActivityCount(
-			socialActivitySet.getActivityCount() - 1);
+		if (activitySet.getActivityCount() == 1) {
+			socialActivitySetPersistence.remove(activitySetId);
 
-		return socialActivitySetPersistence.update(socialActivitySet, false);
+			return;
+		}
+
+		activitySet.setActivityCount(activitySet.getActivityCount() - 1);
+
+		socialActivitySetPersistence.update(activitySet, false);
 	}
 
-	public SocialActivitySet deleteActivitySet(long activitySetId)
-		throws PortalException, SystemException {
-
-		socialActivityPersistence.removeByActivitySetId(activitySetId);
-
-		return socialActivitySetPersistence.remove(activitySetId);
-	}
-
-	public SocialActivitySet deleteActivitySet(SocialActivitySet activitySet)
+	public SocialActivitySet getClassActivitySet(
+			long classNameId, long classPK, int type)
 		throws SystemException {
 
-		socialActivityPersistence.removeByActivitySetId(
-			activitySet.getActivitySetId());
-
-		return socialActivitySetPersistence.remove(activitySet);
+		return socialActivitySetPersistence.fetchByC_C_T_First(
+			classNameId, classPK, type,
+			new SocialActivitySetModifiedDateComparator());
 	}
 
-	public SocialActivitySet incrementActivityCount(long activitySetId)
+	public SocialActivitySet getClassActivitySet(
+			long userId, long classNameId, long classPK, int type)
+		throws SystemException {
+
+		return socialActivitySetPersistence.fetchByU_C_C_T_First(
+			userId, classNameId, classPK, type,
+			new SocialActivitySetModifiedDateComparator());
+	}
+
+	public List<SocialActivitySet> getGroupActivitySets(
+			long groupId, int start, int end)
+		throws SystemException {
+
+		return socialActivitySetPersistence.findByGroupId(
+			groupId, start, end, new SocialActivitySetModifiedDateComparator());
+	}
+
+	public int getGroupActivitySetsCount(long groupId) throws SystemException {
+		return socialActivitySetPersistence.countByGroupId(groupId);
+	}
+
+	public List<SocialActivitySet> getRelationActivitySets(
+			long userId, int start, int end)
+		throws SystemException {
+
+		return socialActivitySetFinder.findByRelation(userId, start, end);
+	}
+
+	public List<SocialActivitySet> getRelationActivitySets(
+			long userId, int type, int start, int end)
+		throws SystemException {
+
+		return socialActivitySetFinder.findByRelationType(
+			userId, type, start, end);
+	}
+
+	public int getRelationActivitySetsCount(long userId)
+		throws SystemException {
+
+		return socialActivitySetFinder.countByRelation(userId);
+	}
+
+	public int getRelationActivitySetsCount(long userId, int type)
+		throws SystemException {
+
+		return socialActivitySetFinder.countByRelationType(userId, type);
+	}
+
+	public SocialActivitySet getUserActivitySet(
+			long groupId, long userId, int type)
+		throws SystemException {
+
+		return socialActivitySetPersistence.fetchByG_U_T_First(
+			groupId, userId, type,
+			new SocialActivitySetModifiedDateComparator());
+	}
+
+	public SocialActivitySet getUserActivitySet(
+			long groupId, long userId, long classNameId, int type)
+		throws SystemException {
+
+		return socialActivitySetPersistence.fetchByG_U_C_T_First(
+			groupId, userId, classNameId, type,
+			new SocialActivitySetModifiedDateComparator());
+	}
+
+	@Override
+	public List<SocialActivitySet> getUserActivitySets(
+			long userId, int start, int end)
+		throws SystemException {
+
+		return socialActivitySetPersistence.findByUserId(userId, start, end);
+	}
+
+	@Override
+	public int getUserActivitySetsCount(long userId) throws SystemException {
+		return socialActivitySetPersistence.countByUserId(userId);
+	}
+
+	public List<SocialActivitySet> getUserGroupsActivitySets(
+			long userId, int start, int end)
+		throws SystemException {
+
+		return socialActivitySetFinder.findByUserGroups(userId, start, end);
+	}
+
+	public int getUserGroupsActivitySetsCount(long userId)
+		throws SystemException {
+
+		return socialActivitySetFinder.countByUserGroups(userId);
+	}
+
+	public List<SocialActivitySet> getUserViewableActivitySets(
+			long userId, int start, int end)
+		throws SystemException {
+
+		return socialActivitySetFinder.findByUser(userId, start, end);
+	}
+
+	public int getUserViewableActivitySetsCount(long userId)
+		throws SystemException {
+
+		return socialActivitySetFinder.countByUser(userId);
+	}
+
+	public void incrementActivityCount(long activitySetId, long activityId)
 		throws PortalException, SystemException {
 
-		SocialActivitySet socialActivitySet =
+		// Activity Set
+
+		SocialActivitySet activitySet =
 			socialActivitySetPersistence.findByPrimaryKey(activitySetId);
 
-		socialActivitySet.setActivityCount(
-			socialActivitySet.getActivityCount() + 1);
+		SocialActivity activity = socialActivityPersistence.findByPrimaryKey(
+			activityId);
 
-		return socialActivitySetPersistence.update(socialActivitySet, false);
+		activitySet.setModifiedDate(activity.getCreateDate());
+		activitySet.setUserId(activity.getUserId());
+
+		activitySet.setActivityCount(activitySet.getActivityCount() + 1);
+
+		socialActivitySetPersistence.update(activitySet, false);
+
+		// Activity
+
+		activity.setActivitySetId(activitySetId);
+
+		socialActivityPersistence.update(activity, false);
 	}
 
 }

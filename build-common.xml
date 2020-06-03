@@ -1,92 +1,72 @@
 <?xml version="1.0"?>
 <!DOCTYPE project>
 
-<project name="build-common" xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="build-common">
+	<dirname file="${ant.file.build-common}" property="sdk.dir" />
+
 	<property environment="env" />
 
-	<property file="${project.dir}/build.${user.name}.properties" />
-	<property file="${project.dir}/build.${env.COMPUTERNAME}.properties" />
-	<property file="${project.dir}/build.${env.HOST}.properties" />
-	<property file="${project.dir}/build.${env.HOSTNAME}.properties" />
-	<property file="${project.dir}/build.properties" />
-
-	<property name="app.server.classes.portal.dir" value="${app.server.portal.dir}/WEB-INF/classes" />
-	<property name="app.server.lib.portal.dir" location="${app.server.portal.dir}/WEB-INF/lib" />
-
-	<condition property="ivy.home" value="${env.IVY_HOME}">
-		<isset property="env.IVY_HOME" />
-	</condition>
-
-	<property name="ivy.home" value="${user.home}/.ivy" />
-	<property name="ivy.install.version" value="2.2.0" />
-	<property name="ivy.jar.dir" value="${ivy.home}/lib" />
-
-	<script language="javascript">
-		var buildListeners = project.getBuildListeners();
-
-		var logger = buildListeners.firstElement();
-
-		logger.setMessageOutputLevel(project.MSG_WARN);
-	</script>
-
-	<mkdir dir="${ivy.jar.dir}" />
-
-	<get
-		dest="${ivy.jar.dir}"
-		skipexisting="true"
-		src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
-	/>
-
-	<path id="ivy.lib.path">
-		<fileset
-			dir="${ivy.jar.dir}"
-			includes="ivy-${ivy.install.version}.jar"
-		/>
+	<path id="lib.classpath">
+		<fileset dir="${sdk.dir}/lib" includes="*.jar" />
 	</path>
 
-	<taskdef classpathref="ivy.lib.path" resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" />
+	<taskdef classpathref="lib.classpath" resource="net/sf/antcontrib/antlib.xml" />
+	<taskdef classpathref="lib.classpath" resource="ise/antelope/tasks/antlib.xml" uri="antlib:ise.antelope.tasks" />
 
-	<ivy:settings file="${project.dir}/ivy-settings.xml" />
+	<property file="${sdk.dir}/build.${user.name}.properties" />
+	<property file="${sdk.dir}/build.${env.COMPUTERNAME}.properties" />
+	<property file="${sdk.dir}/build.${env.HOST}.properties" />
+	<property file="${sdk.dir}/build.${env.HOSTNAME}.properties" />
 
-	<ivy:resolve file="${project.dir}/ivy.xml" />
+	<if>
+		<isset property="app.server.dir" />
+		<then>
+			<if>
+				<isset property="app.server.type" />
+				<then>
+					<propertycopy from="app.server.dir" name="app.server.${app.server.type}.dir" />
+				</then>
+				<else>
+					<propertycopy from="app.server.dir" name="app.server.tomcat.dir" />
+				</else>
+			</if>
+		</then>
+	</if>
 
-	<script language="javascript">
-		var buildListeners = project.getBuildListeners();
+	<property file="${sdk.dir}/build.properties" />
 
-		var logger = buildListeners.firstElement();
+	<propertycopy from="app.server.${app.server.type}.dir" name="app.server.dir" />
+	<propertycopy from="app.server.${app.server.type}.deploy.dir" name="app.server.deploy.dir" />
+	<propertycopy from="app.server.${app.server.type}.lib.global.dir" name="app.server.lib.global.dir" />
+	<propertycopy from="app.server.${app.server.type}.portal.dir" name="app.server.portal.dir" />
+	<propertycopy from="app.server.${app.server.type}.zip.name" name="app.server.zip.name" silent="true" />
 
-		logger.setMessageOutputLevel(project.MSG_INFO);
-	</script>
+	<property name="app.server.classes.portal.dir" value="${app.server.portal.dir}/WEB-INF/classes" />
+	<property location="${app.server.portal.dir}/WEB-INF/lib" name="app.server.lib.portal.dir" />
 
-	<ivy:cachepath pathid="ivy.lib.classpath" />
-	<ivy:cachepath conf="plugin" pathid="ivy.plugin.classpath" />
-	<ivy:cachepath conf="portal" pathid="ivy.portal.classpath" />
-	<ivy:cachepath conf="test" pathid="ivy.test.classpath" />
+	<import file="build-common-ivy.xml" />
 
 	<path id="plugin.classpath">
-		<path refid="ivy.plugin.classpath" />
 		<path refid="plugin-lib.classpath" />
 		<fileset dir="${app.server.lib.global.dir}" includes="*.jar" />
 		<fileset dir="${app.server.lib.portal.dir}" includes="annotations.jar,commons-logging.jar,log4j.jar,util-bridges.jar,util-java.jar,util-taglib.jar" />
+		<fileset dir="${sdk.dir}/lib" includes="activation.jar,javax.servlet-api.jar,jsp-api.jar,mail.jar" />
 	</path>
 
 	<path id="portal.classpath">
-		<path refid="ivy.portal.classpath" />
 		<pathelement location="${app.server.classes.portal.dir}" />
 		<fileset dir="${app.server.lib.global.dir}" includes="*.jar" />
 		<fileset dir="${app.server.lib.portal.dir}" includes="*.jar" />
+		<fileset dir="${sdk.dir}/lib" includes="activation.jar,javax.servlet-api.jar,jsp-api.jar,net.sf.jargs.jar,qdox.jar" />
 	</path>
 
 	<path id="test.classpath">
-		<path refid="ivy.test.classpath" />
 		<path refid="plugin.classpath" />
-		<fileset dir="${app.server.lib.portal.dir}" includes="commons-io.jar" />
+		<fileset dir="${app.server.lib.portal.dir}" excludes="ant.jar" includes="*.jar" />
+		<fileset dir="${sdk.dir}/lib" includes="junit.jar,mockito-all.jar,powermock-*.jar,spring-test.jar" />
 		<pathelement location="test-classes/integration" />
 		<pathelement location="test-classes/unit" />
 	</path>
-
-	<taskdef classpathref="ivy.lib.classpath" resource="net/sf/antcontrib/antlib.xml" />
-	<taskdef classpathref="ivy.lib.classpath" resource="ise/antelope/tasks/antlib.xml" uri="antlib:ise.antelope.tasks" />
 
 	<condition property="correct.ant.version">
 		<antversion atleast="1.7.0" />
@@ -111,12 +91,7 @@
 			</not>
 		</and>
 		<then>
-			<ivy:retrieve
-				conf="ecj"
-				log="quiet"
-				pattern="${ant.home}/lib/[artifact].[ext]"
-				type="jar"
-			/>
+			<copy file="${sdk.dir}/lib/ecj.jar" todir="${ant.home}/lib" />
 
 			<fail>
 .
@@ -146,6 +121,46 @@ ECJ was automatically installed. Please rerun your task.
 		/>
 	</target>
 
+	<target name="compile-jsp">
+		<for param="module.web.dir">
+			<dirset dir="." excludes="**/tools/**" />
+			<sequential>
+				<ant antfile="@{module.web.dir}/build.xml" dir="@{module.web.dir}" target="compile-jsp" />
+			</sequential>
+		</for>
+	</target>
+
+	<target name="create">
+		<if>
+			<or>
+				<not>
+					<isset property="plugin.type" />
+				</not>
+			</or>
+			<then>
+				<fail>This task must be called by the create script.</fail>
+			</then>
+		</if>
+
+		<if>
+			<or>
+				<equals arg1="${plugin.type}" arg2="hook" />
+				<equals arg1="${plugin.type}" arg2="portlet" />
+				<equals arg1="${plugin.type}" arg2="theme" />
+			</or>
+			<then>
+				<subant target="create">
+					<fileset dir="${sdk.dir}/${plugin.type}s" includes="build.xml" />
+				</subant>
+			</then>
+			<else>
+				<subant target="create">
+					<fileset dir="${sdk.dir}/${plugin.type}" includes="build.xml" />
+				</subant>
+			</else>
+		</if>
+	</target>
+
 	<target name="format-javadoc">
 		<java
 			classname="com.liferay.portal.tools.JavadocFormatter"
@@ -164,7 +179,7 @@ ECJ was automatically installed. Please rerun your task.
 
 	<target name="format-source">
 		<java
-			classname="com.liferay.portal.tools.SourceFormatter"
+			classname="com.liferay.portal.tools.sourceformatter.SourceFormatter"
 			classpathref="portal.classpath"
 			fork="true"
 			newenvironment="true"
@@ -192,6 +207,50 @@ ECJ was automatically installed. Please rerun your task.
 			newenvironment="true"
 		>
 			<jvmarg value="-Dplugins.env.dir=." />
+		</java>
+	</target>
+
+	<target name="setup-jrebel">
+		<property name="jrebel.plugin.classes.dir" value="${basedir}/${plugin.classes.dir}" />
+
+		<echo file="${jrebel.plugin.classes.dir}/rebel.xml"><![CDATA[<?xml version="1.0"?>
+
+<application
+	xmlns="http://www.zeroturnaround.com"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.zeroturnaround.com http://www.zeroturnaround.com/alderaan/rebel-2_0.xsd"
+>
+	<classpath>
+		<dir name="${jrebel.plugin.classes.dir}" />
+	</classpath>
+</application>]]></echo>
+
+		<if>
+			<available file="docroot" type="dir" />
+			<then>
+				<replace file="${jrebel.plugin.classes.dir}/rebel.xml">
+					<replacetoken><![CDATA[</application>]]></replacetoken>
+					<replacevalue expandProperties="true"><![CDATA[	<web>
+		<link target="/${plugin.name}">
+			<dir name="${basedir}/docroot" />
+		</link>
+	</web>
+</application>]]></replacevalue>
+				</replace>
+			</then>
+		</if>
+	</target>
+
+	<target name="sort-xml-attributes">
+		<java
+			classname="com.liferay.portal.tools.XMLAttributesSorter"
+			classpathref="portal.classpath"
+			fork="true"
+			newenvironment="true"
+		>
+			<jvmarg value="-Xmx512m" />
+			<jvmarg value="-Xss2048k" />
+			<arg value="sort.xml.file.name=${sort.xml.file.name}" />
 		</java>
 	</target>
 </project>

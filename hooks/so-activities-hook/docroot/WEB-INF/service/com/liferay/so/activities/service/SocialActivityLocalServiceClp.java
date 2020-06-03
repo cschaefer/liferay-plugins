@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -115,7 +115,7 @@ public class SocialActivityLocalServiceClp implements SocialActivityLocalService
 
 		_methodName19 = "addActivity";
 
-		_methodParameterTypes19 = new String[] { "long", "long" };
+		_methodParameterTypes19 = new String[] { "long" };
 
 		_methodName20 = "deleteActivities";
 
@@ -124,6 +124,14 @@ public class SocialActivityLocalServiceClp implements SocialActivityLocalService
 		_methodName21 = "deleteActivity";
 
 		_methodParameterTypes21 = new String[] { "long" };
+
+		_methodName22 = "getActivity";
+
+		_methodParameterTypes22 = new String[] { "long" };
+
+		_methodName23 = "getActivitySetActivities";
+
+		_methodParameterTypes23 = new String[] { "long", "int", "int" };
 	}
 
 	public com.liferay.so.activities.model.SocialActivity addSocialActivity(
@@ -657,13 +665,12 @@ public class SocialActivityLocalServiceClp implements SocialActivityLocalService
 		throw new UnsupportedOperationException();
 	}
 
-	public void addActivity(long activitySetId, long activityId)
+	public void addActivity(long activityId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		try {
 			_invokableLocalService.invokeMethod(_methodName19,
-				_methodParameterTypes19,
-				new Object[] { activitySetId, activityId });
+				_methodParameterTypes19, new Object[] { activityId });
 		}
 		catch (Throwable t) {
 			t = ClpSerializer.translateThrowable(t);
@@ -743,6 +750,68 @@ public class SocialActivityLocalServiceClp implements SocialActivityLocalService
 		}
 	}
 
+	public com.liferay.so.activities.model.SocialActivity getActivity(
+		long activityId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		Object returnObj = null;
+
+		try {
+			returnObj = _invokableLocalService.invokeMethod(_methodName22,
+					_methodParameterTypes22, new Object[] { activityId });
+		}
+		catch (Throwable t) {
+			t = ClpSerializer.translateThrowable(t);
+
+			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
+				throw (com.liferay.portal.kernel.exception.PortalException)t;
+			}
+
+			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
+				throw (com.liferay.portal.kernel.exception.SystemException)t;
+			}
+
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException)t;
+			}
+			else {
+				throw new RuntimeException(t.getClass().getName() +
+					" is not a valid exception");
+			}
+		}
+
+		return (com.liferay.so.activities.model.SocialActivity)ClpSerializer.translateOutput(returnObj);
+	}
+
+	public java.util.List<com.liferay.so.activities.model.SocialActivity> getActivitySetActivities(
+		long activitySetId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		Object returnObj = null;
+
+		try {
+			returnObj = _invokableLocalService.invokeMethod(_methodName23,
+					_methodParameterTypes23,
+					new Object[] { activitySetId, start, end });
+		}
+		catch (Throwable t) {
+			t = ClpSerializer.translateThrowable(t);
+
+			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
+				throw (com.liferay.portal.kernel.exception.SystemException)t;
+			}
+
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException)t;
+			}
+			else {
+				throw new RuntimeException(t.getClass().getName() +
+					" is not a valid exception");
+			}
+		}
+
+		return (java.util.List<com.liferay.so.activities.model.SocialActivity>)ClpSerializer.translateOutput(returnObj);
+	}
+
 	private InvokableLocalService _invokableLocalService;
 	private String _methodName0;
 	private String[] _methodParameterTypes0;
@@ -786,4 +855,8 @@ public class SocialActivityLocalServiceClp implements SocialActivityLocalService
 	private String[] _methodParameterTypes20;
 	private String _methodName21;
 	private String[] _methodParameterTypes21;
+	private String _methodName22;
+	private String[] _methodParameterTypes22;
+	private String _methodName23;
+	private String[] _methodParameterTypes23;
 }

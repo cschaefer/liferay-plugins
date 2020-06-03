@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,30 +14,30 @@
 
 package com.liferay.wsrp.consumer.portlet;
 
+import com.liferay.compat.portal.kernel.portlet.PortletResponseUtil;
+import com.liferay.compat.portal.kernel.servlet.HttpHeaders;
+import com.liferay.compat.portal.kernel.util.ArrayUtil;
+import com.liferay.compat.portal.kernel.util.HttpUtil;
+import com.liferay.compat.portal.kernel.util.StringUtil;
+import com.liferay.compat.portal.kernel.util.Validator;
+import com.liferay.compat.portal.util.PortalUtil;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.portlet.LiferayPortletResponse;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
-import com.liferay.portal.kernel.portlet.PortletResponseUtil;
-import com.liferay.portal.kernel.servlet.HttpHeaders;
 import com.liferay.portal.kernel.upload.UploadPortletRequest;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.Base64;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.FileUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.Http;
-import com.liferay.portal.kernel.util.HttpUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.TransientValue;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.uuid.PortalUUIDUtil;
 import com.liferay.portal.model.Address;
-import com.liferay.portal.model.Company;
 import com.liferay.portal.model.EmailAddress;
 import com.liferay.portal.model.ListType;
 import com.liferay.portal.model.Phone;
@@ -50,8 +50,6 @@ import com.liferay.portal.service.ListTypeServiceUtil;
 import com.liferay.portal.service.PhoneLocalServiceUtil;
 import com.liferay.portal.service.WebsiteLocalServiceUtil;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
-import com.liferay.util.Encryptor;
 import com.liferay.wsrp.axis.WSRPHTTPSender;
 import com.liferay.wsrp.model.WSRPConsumer;
 import com.liferay.wsrp.model.WSRPConsumerPortlet;
@@ -65,6 +63,7 @@ import com.liferay.wsrp.util.MarkupCharacterSetsUtil;
 import com.liferay.wsrp.util.PortletPropsValues;
 import com.liferay.wsrp.util.WSRPConsumerManager;
 import com.liferay.wsrp.util.WSRPConsumerManagerFactory;
+import com.liferay.wsrp.util.WSRPURLUtil;
 import com.liferay.wsrp.util.WebKeys;
 
 import java.io.IOException;
@@ -262,7 +261,7 @@ public class ConsumerPortlet extends GenericPortlet {
 		String url = GetterUtil.getString(
 			resourceRequest.getParameter("wsrp-url"));
 		String wsrpAuth = GetterUtil.getString(
-			resourceRequest.getParameter("wsrp-auth"));
+			resourceRequest.getParameter(WebKeys.WSRP_AUTH));
 
 		StringBundler sb = new StringBundler(4);
 
@@ -270,25 +269,28 @@ public class ConsumerPortlet extends GenericPortlet {
 		sb.append(url);
 		sb.append(PortletPropsValues.SECURE_RESOURCE_URLS_SALT);
 
-		String expectedWsrpAuth = encodeWSRPAuth(
-			resourceRequest, sb.toString());
+		ThemeDisplay themeDisplay = (ThemeDisplay)resourceRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
-		if (wsrpAuth.equals(expectedWsrpAuth)) {
+		String expectedWSRPAuth = WSRPURLUtil.encodeWSRPAuth(
+			themeDisplay.getCompanyId(), sb.toString());
+
+		if (wsrpAuth.equals(expectedWSRPAuth)) {
 			return true;
 		}
 
 		sb.append(AuthTokenUtil.getToken(request));
 
-		expectedWsrpAuth = encodeWSRPAuth(resourceRequest, sb.toString());
+		expectedWSRPAuth = WSRPURLUtil.encodeWSRPAuth(
+			themeDisplay.getCompanyId(), sb.toString());
 
-		if (wsrpAuth.equals(expectedWsrpAuth)) {
+		if (wsrpAuth.equals(expectedWSRPAuth)) {
 			return true;
 		}
-		else {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-			return false;
-		}
+		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+		return false;
 	}
 
 	protected void doProcessAction(
@@ -440,22 +442,6 @@ public class ConsumerPortlet extends GenericPortlet {
 		}
 	}
 
-	protected String encodeWSRPAuth(
-			PortletRequest portletRequest, String wsrpAuth)
-		throws Exception {
-
-		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		Company company = themeDisplay.getCompany();
-
-		wsrpAuth = String.valueOf(wsrpAuth.hashCode());
-		wsrpAuth = Encryptor.encrypt(company.getKeyObj(), wsrpAuth);
-		wsrpAuth = Base64.toURLSafe(wsrpAuth);
-
-		return wsrpAuth;
-	}
-
 	protected Calendar getBdate(User user) throws Exception {
 		Calendar birthday = Calendar.getInstance();
 
@@ -570,8 +556,8 @@ public class ConsumerPortlet extends GenericPortlet {
 			markupResponse = markupService.getMarkup(getMarkup);
 		}
 
-		// There is a memory leak in Axis that caches the entire response
-		// after each call. See LPS-25067.
+		// There is a memory leak in Axis that caches the entire response after
+		// each call. See LPS-25067.
 
 		Stub stub = (Stub)markupService;
 
@@ -588,7 +574,7 @@ public class ConsumerPortlet extends GenericPortlet {
 
 		Online online = new Online();
 
-		String email = getOnlineEmail(user, "E-mail");
+		String email = getOnlineEmail(user, "email");
 
 		if (email != null) {
 			online.setEmail(email);
@@ -877,7 +863,7 @@ public class ConsumerPortlet extends GenericPortlet {
 		Telecom telecom = new Telecom();
 
 		TelephoneNum faxTelephoneNum = getTelephoneNum(
-			user, listTypeName + " Fax");
+			user, listTypeName + "-fax");
 
 		if (faxTelephoneNum != null) {
 			telecom.setFax(faxTelephoneNum);
@@ -925,7 +911,7 @@ public class ConsumerPortlet extends GenericPortlet {
 
 		userProfile.setBdate(bdate);
 
-		Contact businessInfoContact = getContact(user, "Business");
+		Contact businessInfoContact = getContact(user, "business");
 
 		userProfile.setBusinessInfo(businessInfoContact);
 
@@ -933,7 +919,7 @@ public class ConsumerPortlet extends GenericPortlet {
 
 		userProfile.setGender(gender);
 
-		Contact homeInfoContact = getContact(user, "Personal");
+		Contact homeInfoContact = getContact(user, "personal");
 
 		userProfile.setHomeInfo(homeInfoContact);
 
@@ -2025,9 +2011,10 @@ public class ConsumerPortlet extends GenericPortlet {
 			sb.append(AuthTokenUtil.getToken(request));
 		}
 
-		String wsrpAuth = encodeWSRPAuth(portletRequest, sb.toString());
+		String wsrpAuth = WSRPURLUtil.encodeWSRPAuth(
+			themeDisplay.getCompanyId(), sb.toString());
 
-		parameterMap.put("wsrp-auth", wsrpAuth);
+		parameterMap.put(WebKeys.WSRP_AUTH, wsrpAuth);
 	}
 
 	protected void sendRedirect(
@@ -2051,7 +2038,6 @@ public class ConsumerPortlet extends GenericPortlet {
 		portletSession.setAttribute(WebKeys.SESSION_CONTEXT, sessionContext);
 
 		serviceHolder.setSessionContext(sessionContext);
-
 	}
 
 	private static final String _BLOCKING_ACTION_TEMPLATE =

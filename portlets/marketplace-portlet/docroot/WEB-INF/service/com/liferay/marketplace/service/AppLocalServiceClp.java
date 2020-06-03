@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -112,15 +112,13 @@ public class AppLocalServiceClp implements AppLocalService {
 
 		_methodParameterTypes17 = new String[] { "java.lang.String" };
 
-		_methodName19 = "addApp";
+		_methodName19 = "fetchRemoteApp";
 
-		_methodParameterTypes19 = new String[] {
-				"long", "long", "java.lang.String", "java.io.File"
-			};
+		_methodParameterTypes19 = new String[] { "long" };
 
-		_methodName20 = "fetchRemoteApp";
+		_methodName20 = "getInstalledApps";
 
-		_methodParameterTypes20 = new String[] { "long" };
+		_methodParameterTypes20 = new String[] {  };
 
 		_methodName21 = "installApp";
 
@@ -136,8 +134,12 @@ public class AppLocalServiceClp implements AppLocalService {
 
 		_methodName24 = "updateApp";
 
-		_methodParameterTypes24 = new String[] {
-				"long", "java.lang.String", "java.io.File"
+		_methodParameterTypes24 = new String[] { "long", "java.io.File" };
+
+		_methodName25 = "updateApp";
+
+		_methodParameterTypes25 = new String[] {
+				"long", "long", "java.lang.String", "java.io.File"
 			};
 	}
 
@@ -663,31 +665,16 @@ public class AppLocalServiceClp implements AppLocalService {
 		throw new UnsupportedOperationException();
 	}
 
-	public com.liferay.marketplace.model.App addApp(long userId,
-		long remoteAppId, java.lang.String version, java.io.File file)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
+	public com.liferay.marketplace.model.App fetchRemoteApp(long remoteAppId)
+		throws com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
 		try {
 			returnObj = _invokableLocalService.invokeMethod(_methodName19,
-					_methodParameterTypes19,
-					new Object[] {
-						userId,
-						
-					remoteAppId,
-						
-					ClpSerializer.translateInput(version),
-						
-					ClpSerializer.translateInput(file)
-					});
+					_methodParameterTypes19, new Object[] { remoteAppId });
 		}
 		catch (Throwable t) {
 			t = ClpSerializer.translateThrowable(t);
-
-			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
-				throw (com.liferay.portal.kernel.exception.PortalException)t;
-			}
 
 			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
 				throw (com.liferay.portal.kernel.exception.SystemException)t;
@@ -705,13 +692,13 @@ public class AppLocalServiceClp implements AppLocalService {
 		return (com.liferay.marketplace.model.App)ClpSerializer.translateOutput(returnObj);
 	}
 
-	public com.liferay.marketplace.model.App fetchRemoteApp(long remoteAppId)
+	public java.util.List<com.liferay.marketplace.model.App> getInstalledApps()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
 
 		try {
 			returnObj = _invokableLocalService.invokeMethod(_methodName20,
-					_methodParameterTypes20, new Object[] { remoteAppId });
+					_methodParameterTypes20, new Object[] {  });
 		}
 		catch (Throwable t) {
 			t = ClpSerializer.translateThrowable(t);
@@ -729,7 +716,7 @@ public class AppLocalServiceClp implements AppLocalService {
 			}
 		}
 
-		return (com.liferay.marketplace.model.App)ClpSerializer.translateOutput(returnObj);
+		return (java.util.List<com.liferay.marketplace.model.App>)ClpSerializer.translateOutput(returnObj);
 	}
 
 	public void installApp(long remoteAppId)
@@ -817,8 +804,8 @@ public class AppLocalServiceClp implements AppLocalService {
 		}
 	}
 
-	public com.liferay.marketplace.model.App updateApp(long appId,
-		java.lang.String version, java.io.File file)
+	public com.liferay.marketplace.model.App updateApp(long userId,
+		java.io.File file)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		Object returnObj = null;
@@ -826,8 +813,44 @@ public class AppLocalServiceClp implements AppLocalService {
 		try {
 			returnObj = _invokableLocalService.invokeMethod(_methodName24,
 					_methodParameterTypes24,
+					new Object[] { userId, ClpSerializer.translateInput(file) });
+		}
+		catch (Throwable t) {
+			t = ClpSerializer.translateThrowable(t);
+
+			if (t instanceof com.liferay.portal.kernel.exception.PortalException) {
+				throw (com.liferay.portal.kernel.exception.PortalException)t;
+			}
+
+			if (t instanceof com.liferay.portal.kernel.exception.SystemException) {
+				throw (com.liferay.portal.kernel.exception.SystemException)t;
+			}
+
+			if (t instanceof RuntimeException) {
+				throw (RuntimeException)t;
+			}
+			else {
+				throw new RuntimeException(t.getClass().getName() +
+					" is not a valid exception");
+			}
+		}
+
+		return (com.liferay.marketplace.model.App)ClpSerializer.translateOutput(returnObj);
+	}
+
+	public com.liferay.marketplace.model.App updateApp(long userId,
+		long remoteAppId, java.lang.String version, java.io.File file)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		Object returnObj = null;
+
+		try {
+			returnObj = _invokableLocalService.invokeMethod(_methodName25,
+					_methodParameterTypes25,
 					new Object[] {
-						appId,
+						userId,
+						
+					remoteAppId,
 						
 					ClpSerializer.translateInput(version),
 						
@@ -906,4 +929,6 @@ public class AppLocalServiceClp implements AppLocalService {
 	private String[] _methodParameterTypes23;
 	private String _methodName24;
 	private String[] _methodParameterTypes24;
+	private String _methodName25;
+	private String[] _methodParameterTypes25;
 }

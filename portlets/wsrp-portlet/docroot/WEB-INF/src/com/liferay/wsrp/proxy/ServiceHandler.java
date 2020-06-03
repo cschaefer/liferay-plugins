@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,10 +14,10 @@
 
 package com.liferay.wsrp.proxy;
 
+import com.liferay.compat.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.util.ProxyUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.wsrp.axis.WSRPHTTPSender;
 import com.liferay.wsrp.client.PasswordCallback;
 import com.liferay.wsrp.util.PortletPropsValues;
@@ -163,6 +163,7 @@ public class ServiceHandler implements InvocationHandler {
 			new Class[] {proxyInterface, Stub.class}, invocationHandler);
 	}
 
+	@Override
 	public Object invoke(Object proxy, Method method, Object[] args)
 		throws Throwable {
 

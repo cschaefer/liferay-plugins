@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -16,27 +16,20 @@ package com.liferay.akismet.moderation.portlet;
 
 import com.liferay.akismet.util.AkismetConstants;
 import com.liferay.akismet.util.AkismetUtil;
+import com.liferay.compat.portal.kernel.util.StringUtil;
 import com.liferay.compat.portal.util.PortalUtil;
-import com.liferay.portal.kernel.dao.orm.DynamicQuery;
-import com.liferay.portal.kernel.dao.orm.DynamicQueryFactoryUtil;
-import com.liferay.portal.kernel.dao.orm.OrderFactoryUtil;
-import com.liferay.portal.kernel.dao.orm.Property;
-import com.liferay.portal.kernel.dao.orm.PropertyFactoryUtil;
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.compat.util.bridges.mvc.MVCPortlet;
 import com.liferay.portal.kernel.portlet.LiferayPortletURL;
 import com.liferay.portal.kernel.servlet.SessionMessages;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.WebKeys;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
+import com.liferay.portal.model.Group;
 import com.liferay.portal.security.auth.PrincipalException;
-import com.liferay.portal.security.permission.ActionKeys;
 import com.liferay.portal.security.permission.PermissionChecker;
-import com.liferay.portal.security.permission.PermissionThreadLocal;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.theme.ThemeDisplay;
@@ -46,12 +39,11 @@ import com.liferay.portlet.messageboards.NoSuchMessageException;
 import com.liferay.portlet.messageboards.RequiredMessageException;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil;
+import com.liferay.portlet.messageboards.service.MBMessageServiceUtil;
 import com.liferay.portlet.wiki.NoSuchPageException;
 import com.liferay.portlet.wiki.model.WikiNode;
 import com.liferay.portlet.wiki.model.WikiPage;
 import com.liferay.portlet.wiki.service.WikiPageLocalServiceUtil;
-import com.liferay.portlet.wiki.util.comparator.PageVersionComparator;
-import com.liferay.util.bridges.mvc.MVCPortlet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,11 +62,6 @@ public class ModerationPortlet extends MVCPortlet {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		checkMBMessagePermission(themeDisplay.getScopeGroupId());
-
 		long[] mbMessageIds = ParamUtil.getLongValues(
 			actionRequest, "deleteMBMessageIds");
 
@@ -87,16 +74,11 @@ public class ModerationPortlet extends MVCPortlet {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		checkMBMessagePermission(themeDisplay.getScopeGroupId());
-
 		long[] mbMessageIds = ParamUtil.getLongValues(
 			actionRequest, "deleteMBMessageIds");
 
 		for (long mbMessageId : mbMessageIds) {
-			MBMessageLocalServiceUtil.deleteMessage(mbMessageId);
+			MBMessageServiceUtil.deleteMessage(mbMessageId);
 		}
 	}
 
@@ -106,8 +88,6 @@ public class ModerationPortlet extends MVCPortlet {
 
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
-
-		checkMBMessagePermission(themeDisplay.getScopeGroupId());
 
 		long[] mbMessageIds = ParamUtil.getLongValues(
 			actionRequest, "notSpamMBMessageIds");
@@ -120,7 +100,9 @@ public class ModerationPortlet extends MVCPortlet {
 				themeDisplay.getUserId(), mbMessageId,
 				WorkflowConstants.STATUS_APPROVED, serviceContext);
 
-			AkismetUtil.submitHam(mbMessage);
+			if (AkismetUtil.isMessageBoardsEnabled(mbMessage.getCompanyId())) {
+				AkismetUtil.submitHam(mbMessage);
+			}
 		}
 	}
 
@@ -131,21 +113,18 @@ public class ModerationPortlet extends MVCPortlet {
 		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
 			WebKeys.THEME_DISPLAY);
 
-		checkWikiPagePermission(themeDisplay.getScopeGroupId());
-
 		long[] wikiPageIds = ParamUtil.getLongValues(
 			actionRequest, "notSpamWikiPageIds");
 
 		List<String> wikiPageLinks = new ArrayList<String>();
 
-		ServiceContext serviceContext = ServiceContextFactory.getInstance(
-			actionRequest);
-
 		for (long wikiPageId : wikiPageIds) {
 			WikiPage wikiPage = WikiPageLocalServiceUtil.getPageByPageId(
 				wikiPageId);
 
-			WikiPage latestVersionWikiPage = getWikiPage(wikiPage, false);
+			WikiPage latestVersionWikiPage = AkismetUtil.getWikiPage(
+				wikiPage.getNodeId(), wikiPage.getTitle(),
+				wikiPage.getVersion(), false);
 
 			String latestContent = null;
 
@@ -153,7 +132,9 @@ public class ModerationPortlet extends MVCPortlet {
 				latestContent = latestVersionWikiPage.getContent();
 			}
 
-			WikiPage previousVersionWikiPage = getWikiPage(wikiPage, true);
+			WikiPage previousVersionWikiPage = AkismetUtil.getWikiPage(
+				wikiPage.getNodeId(), wikiPage.getTitle(),
+				wikiPage.getVersion(), true);
 
 			String previousContent = null;
 
@@ -161,10 +142,20 @@ public class ModerationPortlet extends MVCPortlet {
 				previousContent = previousVersionWikiPage.getContent();
 			}
 
+			// Selected version
+
+			wikiPage.setStatus(WorkflowConstants.STATUS_APPROVED);
+			wikiPage.setSummary(StringPool.BLANK);
+
+			wikiPage = WikiPageLocalServiceUtil.updateWikiPage(wikiPage);
+
 			// Latest version
 
-			if ((latestContent != null) && (previousContent != null) &&
-				 latestContent.equals(previousContent)) {
+			if ((latestContent != null) && ((previousContent == null) ||
+				 latestContent.equals(previousContent))) {
+
+				ServiceContext serviceContext =
+					ServiceContextFactory.getInstance(actionRequest);
 
 				WikiPageLocalServiceUtil.revertPage(
 					themeDisplay.getUserId(), wikiPage.getNodeId(),
@@ -199,24 +190,19 @@ public class ModerationPortlet extends MVCPortlet {
 				wikiPageLinks.add(sb.toString());
 			}
 
-			// Selected version
-
-			wikiPage.setStatus(WorkflowConstants.STATUS_APPROVED);
-			wikiPage.setSummary(StringPool.BLANK);
-
-			wikiPage = WikiPageLocalServiceUtil.updateWikiPage(wikiPage);
-
 			// Akismet
 
-			AkismetUtil.submitHam(wikiPage);
+			if (AkismetUtil.isWikiEnabled(wikiPage.getCompanyId())) {
+				AkismetUtil.submitHam(wikiPage);
+			}
 		}
 
 		if (!wikiPageLinks.isEmpty()) {
-			SessionMessages.add(actionRequest, "request_processed");
-
 			SessionMessages.add(
 				actionRequest, "anotherUserHasMadeChangesToThesePages",
 				StringUtil.merge(wikiPageLinks, "<br />"));
+
+			addSuccessMessage(actionRequest, actionResponse);
 
 			super.sendRedirect(actionRequest, actionResponse);
 		}
@@ -226,11 +212,6 @@ public class ModerationPortlet extends MVCPortlet {
 			ActionRequest actionRequest, ActionResponse actionResponse)
 		throws Exception {
 
-		ThemeDisplay themeDisplay = (ThemeDisplay)actionRequest.getAttribute(
-			WebKeys.THEME_DISPLAY);
-
-		checkWikiPagePermission(themeDisplay.getScopeGroupId());
-
 		long[] wikiPageIds = ParamUtil.getLongValues(
 			actionRequest, "spamWikiPageIds");
 
@@ -238,79 +219,33 @@ public class ModerationPortlet extends MVCPortlet {
 			WikiPage wikiPage = WikiPageLocalServiceUtil.getPageByPageId(
 				wikiPageId);
 
-			wikiPage.setStatus(WorkflowConstants.STATUS_DENIED);
-			wikiPage.setSummary(AkismetConstants.WIKI_PAGE_SPAM);
+			wikiPage.setSummary(AkismetConstants.WIKI_PAGE_MARKED_AS_SPAM);
 
 			WikiPageLocalServiceUtil.updateWikiPage(wikiPage);
 		}
 	}
 
-	protected void checkMBMessagePermission(long scopeGroupId)
-		throws PortalException {
+	@Override
+	protected boolean isProcessPortletRequest(PortletRequest portletRequest) {
+		ThemeDisplay themeDisplay = (ThemeDisplay)portletRequest.getAttribute(
+			WebKeys.THEME_DISPLAY);
 
 		PermissionChecker permissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
+			themeDisplay.getPermissionChecker();
 
-		if (!permissionChecker.hasPermission(
-				scopeGroupId, "com.liferay.portlet.messageboards", scopeGroupId,
-				ActionKeys.BAN_USER)) {
-
-			throw new PrincipalException();
-		}
-	}
-
-	protected void checkWikiPagePermission(long scopeGroupId)
-		throws PortalException {
-
-		PermissionChecker permissionChecker =
-			PermissionThreadLocal.getPermissionChecker();
-
-		if (!permissionChecker.hasPermission(
-				scopeGroupId, "com.liferay.portlet.wiki", scopeGroupId,
-				ActionKeys.ADD_NODE)) {
-
-			throw new PrincipalException();
-		}
-	}
-
-	protected WikiPage getWikiPage(WikiPage wikiPage, boolean previous)
-		throws SystemException {
-
-		DynamicQuery dynamicQuery = DynamicQueryFactoryUtil.forClass(
-			WikiPage.class);
-
-		Property nodeIdProperty = PropertyFactoryUtil.forName("nodeId");
-
-		dynamicQuery.add(nodeIdProperty.eq(wikiPage.getNodeId()));
-
-		Property titleProperty = PropertyFactoryUtil.forName("title");
-
-		dynamicQuery.add(titleProperty.eq(wikiPage.getTitle()));
-
-		Property statusProperty = PropertyFactoryUtil.forName("status");
-
-		dynamicQuery.add(statusProperty.eq(WorkflowConstants.STATUS_APPROVED));
-
-		Property versionProperty = PropertyFactoryUtil.forName("version");
-
-		if (previous) {
-			dynamicQuery.add(versionProperty.lt(wikiPage.getVersion()));
-		}
-		else {
-			dynamicQuery.add(versionProperty.ge(wikiPage.getVersion()));
+		if (permissionChecker.isCompanyAdmin()) {
+			return true;
 		}
 
-		OrderFactoryUtil.addOrderByComparator(
-			dynamicQuery, new PageVersionComparator());
+		Group group = themeDisplay.getScopeGroup();
 
-		List<WikiPage> wikiPages = WikiPageLocalServiceUtil.dynamicQuery(
-			dynamicQuery, 0, 1);
+		if (group.isSite() &&
+			permissionChecker.isGroupAdmin(themeDisplay.getScopeGroupId())) {
 
-		if (wikiPages.isEmpty()) {
-			return null;
+			return true;
 		}
 
-		return wikiPages.get(0);
+		return false;
 	}
 
 	@Override

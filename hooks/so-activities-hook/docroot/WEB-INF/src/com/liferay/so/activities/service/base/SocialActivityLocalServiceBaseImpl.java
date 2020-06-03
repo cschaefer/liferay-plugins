@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -29,18 +29,23 @@ import com.liferay.portal.kernel.search.IndexableType;
 import com.liferay.portal.kernel.util.OrderByComparator;
 import com.liferay.portal.model.PersistedModel;
 import com.liferay.portal.service.BaseLocalServiceImpl;
+import com.liferay.portal.service.ClassNameLocalService;
+import com.liferay.portal.service.ClassNameService;
 import com.liferay.portal.service.PersistedModelLocalServiceRegistryUtil;
 import com.liferay.portal.service.ResourceLocalService;
 import com.liferay.portal.service.ResourceService;
 import com.liferay.portal.service.UserLocalService;
 import com.liferay.portal.service.UserService;
+import com.liferay.portal.service.persistence.ClassNamePersistence;
 import com.liferay.portal.service.persistence.ResourcePersistence;
 import com.liferay.portal.service.persistence.UserPersistence;
 
 import com.liferay.so.activities.model.SocialActivity;
+import com.liferay.so.activities.service.SocialActivityInterpreterLocalService;
 import com.liferay.so.activities.service.SocialActivityLocalService;
 import com.liferay.so.activities.service.SocialActivitySetLocalService;
 import com.liferay.so.activities.service.persistence.SocialActivityPersistence;
+import com.liferay.so.activities.service.persistence.SocialActivitySetFinder;
 import com.liferay.so.activities.service.persistence.SocialActivitySetPersistence;
 
 import java.io.Serializable;
@@ -313,6 +318,25 @@ public abstract class SocialActivityLocalServiceBaseImpl
 	}
 
 	/**
+	 * Returns the social activity interpreter local service.
+	 *
+	 * @return the social activity interpreter local service
+	 */
+	public SocialActivityInterpreterLocalService getSocialActivityInterpreterLocalService() {
+		return socialActivityInterpreterLocalService;
+	}
+
+	/**
+	 * Sets the social activity interpreter local service.
+	 *
+	 * @param socialActivityInterpreterLocalService the social activity interpreter local service
+	 */
+	public void setSocialActivityInterpreterLocalService(
+		SocialActivityInterpreterLocalService socialActivityInterpreterLocalService) {
+		this.socialActivityInterpreterLocalService = socialActivityInterpreterLocalService;
+	}
+
+	/**
 	 * Returns the social activity set local service.
 	 *
 	 * @return the social activity set local service
@@ -351,6 +375,25 @@ public abstract class SocialActivityLocalServiceBaseImpl
 	}
 
 	/**
+	 * Returns the social activity set finder.
+	 *
+	 * @return the social activity set finder
+	 */
+	public SocialActivitySetFinder getSocialActivitySetFinder() {
+		return socialActivitySetFinder;
+	}
+
+	/**
+	 * Sets the social activity set finder.
+	 *
+	 * @param socialActivitySetFinder the social activity set finder
+	 */
+	public void setSocialActivitySetFinder(
+		SocialActivitySetFinder socialActivitySetFinder) {
+		this.socialActivitySetFinder = socialActivitySetFinder;
+	}
+
+	/**
 	 * Returns the counter local service.
 	 *
 	 * @return the counter local service
@@ -366,6 +409,62 @@ public abstract class SocialActivityLocalServiceBaseImpl
 	 */
 	public void setCounterLocalService(CounterLocalService counterLocalService) {
 		this.counterLocalService = counterLocalService;
+	}
+
+	/**
+	 * Returns the class name local service.
+	 *
+	 * @return the class name local service
+	 */
+	public ClassNameLocalService getClassNameLocalService() {
+		return classNameLocalService;
+	}
+
+	/**
+	 * Sets the class name local service.
+	 *
+	 * @param classNameLocalService the class name local service
+	 */
+	public void setClassNameLocalService(
+		ClassNameLocalService classNameLocalService) {
+		this.classNameLocalService = classNameLocalService;
+	}
+
+	/**
+	 * Returns the class name remote service.
+	 *
+	 * @return the class name remote service
+	 */
+	public ClassNameService getClassNameService() {
+		return classNameService;
+	}
+
+	/**
+	 * Sets the class name remote service.
+	 *
+	 * @param classNameService the class name remote service
+	 */
+	public void setClassNameService(ClassNameService classNameService) {
+		this.classNameService = classNameService;
+	}
+
+	/**
+	 * Returns the class name persistence.
+	 *
+	 * @return the class name persistence
+	 */
+	public ClassNamePersistence getClassNamePersistence() {
+		return classNamePersistence;
+	}
+
+	/**
+	 * Sets the class name persistence.
+	 *
+	 * @param classNamePersistence the class name persistence
+	 */
+	public void setClassNamePersistence(
+		ClassNamePersistence classNamePersistence) {
+		this.classNamePersistence = classNamePersistence;
 	}
 
 	/**
@@ -560,12 +659,22 @@ public abstract class SocialActivityLocalServiceBaseImpl
 	protected SocialActivityLocalService socialActivityLocalService;
 	@BeanReference(type = SocialActivityPersistence.class)
 	protected SocialActivityPersistence socialActivityPersistence;
+	@BeanReference(type = SocialActivityInterpreterLocalService.class)
+	protected SocialActivityInterpreterLocalService socialActivityInterpreterLocalService;
 	@BeanReference(type = SocialActivitySetLocalService.class)
 	protected SocialActivitySetLocalService socialActivitySetLocalService;
 	@BeanReference(type = SocialActivitySetPersistence.class)
 	protected SocialActivitySetPersistence socialActivitySetPersistence;
+	@BeanReference(type = SocialActivitySetFinder.class)
+	protected SocialActivitySetFinder socialActivitySetFinder;
 	@BeanReference(type = CounterLocalService.class)
 	protected CounterLocalService counterLocalService;
+	@BeanReference(type = ClassNameLocalService.class)
+	protected ClassNameLocalService classNameLocalService;
+	@BeanReference(type = ClassNameService.class)
+	protected ClassNameService classNameService;
+	@BeanReference(type = ClassNamePersistence.class)
+	protected ClassNamePersistence classNamePersistence;
 	@BeanReference(type = ResourceLocalService.class)
 	protected ResourceLocalService resourceLocalService;
 	@BeanReference(type = ResourceService.class)

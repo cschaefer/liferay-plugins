@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,7 +15,11 @@
 package com.liferay.knowledgebase.admin.lar;
 
 import com.liferay.compat.portal.kernel.lar.BasePortletDataHandler;
+import com.liferay.compat.portal.kernel.util.ArrayUtil;
+import com.liferay.compat.portal.kernel.util.ListUtil;
+import com.liferay.compat.portal.kernel.util.StringUtil;
 import com.liferay.counter.service.CounterLocalServiceUtil;
+import com.liferay.knowledgebase.NoSuchArticleException;
 import com.liferay.knowledgebase.admin.util.AdminUtil;
 import com.liferay.knowledgebase.model.KBArticle;
 import com.liferay.knowledgebase.model.KBArticleConstants;
@@ -35,12 +39,9 @@ import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.lar.PortletDataContext;
 import com.liferay.portal.kernel.lar.PortletDataHandlerBoolean;
 import com.liferay.portal.kernel.lar.PortletDataHandlerControl;
-import com.liferay.portal.kernel.util.ArrayUtil;
 import com.liferay.portal.kernel.util.FileUtil;
-import com.liferay.portal.kernel.util.ListUtil;
 import com.liferay.portal.kernel.util.MapUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.kernel.xml.Document;
 import com.liferay.portal.kernel.xml.Element;
@@ -112,7 +113,7 @@ public class AdminPortletDataHandler extends BasePortletDataHandler {
 			"com.liferay.knowledgebase.admin",
 			portletDataContext.getScopeGroupId());
 
-		Element rootElement = addExportRootElement();
+		Element rootElement = addExportDataRootElement(portletDataContext);
 
 		rootElement.addAttribute(
 			"group-id", String.valueOf(portletDataContext.getScopeGroupId()));
@@ -121,7 +122,7 @@ public class AdminPortletDataHandler extends BasePortletDataHandler {
 		exportKBTemplates(portletDataContext, rootElement);
 		exportKBComments(portletDataContext, rootElement);
 
-		return rootElement.formattedString();
+		return getExportDataRootElementString(rootElement);
 	}
 
 	@Override
@@ -389,35 +390,19 @@ public class AdminPortletDataHandler extends BasePortletDataHandler {
 		KBArticle importedKBArticle = null;
 
 		if (portletDataContext.isDataStrategyMirror()) {
-			KBArticle existingKBArticle = KBArticleUtil.fetchByUUID_G(
-				kbArticle.getUuid(), portletDataContext.getScopeGroupId());
-
-			if (existingKBArticle == null) {
-				importedKBArticle = importKBArticleVersions(
-					portletDataContext, kbArticle.getUuid(),
-					parentResourcePrimKey, dirName, kbArticleElement);
-			}
-			else {
-				KBArticleLocalServiceUtil.updateKBArticle(
-					userId, existingKBArticle.getResourcePrimKey(),
-					kbArticle.getTitle(), kbArticle.getContent(),
-					kbArticle.getDescription(), sections, dirName,
-					serviceContext);
-
-				KBArticleLocalServiceUtil.moveKBArticle(
-					userId, existingKBArticle.getResourcePrimKey(),
-					parentResourcePrimKey, kbArticle.getPriority());
-
-				importedKBArticle =
-					KBArticleLocalServiceUtil.getLatestKBArticle(
-						existingKBArticle.getResourcePrimKey(),
-						WorkflowConstants.STATUS_APPROVED);
-			}
+			importedKBArticle = importKBArticleVersions(
+				portletDataContext, kbArticle.getUuid(), parentResourcePrimKey,
+				dirName, kbArticleElement, kbArticlePKs);
 		}
 		else {
-			importedKBArticle = importKBArticleVersions(
-				portletDataContext, null, parentResourcePrimKey, dirName,
-				kbArticleElement);
+			importedKBArticle = KBArticleLocalServiceUtil.addKBArticle(
+				userId, parentResourcePrimKey, kbArticle.getTitle(),
+				kbArticle.getContent(), kbArticle.getDescription(), sections,
+				null, serviceContext);
+
+			KBArticleLocalServiceUtil.updatePriority(
+				importedKBArticle.getResourcePrimKey(),
+				kbArticle.getPriority());
 		}
 
 		portletDataContext.importClassedModel(
@@ -515,7 +500,7 @@ public class AdminPortletDataHandler extends BasePortletDataHandler {
 	protected KBArticle importKBArticleVersions(
 			PortletDataContext portletDataContext, String uuid,
 			long parentResourcePrimKey, String dirName,
-			Element kbArticleElement)
+			Element kbArticleElement, Map<Long, Long> kbArticlePKs)
 		throws Exception {
 
 		Element versionsElement = kbArticleElement.element("versions");
@@ -544,20 +529,65 @@ public class AdminPortletDataHandler extends BasePortletDataHandler {
 				portletDataContext.createServiceContext(
 					curKBArticleElement, curKBArticle, NAMESPACE);
 
-			if (importedKBArticle == null) {
-				serviceContext.setUuid(uuid);
+			long resourcePrimaryKey = MapUtil.getLong(
+				kbArticlePKs, curKBArticle.getResourcePrimKey(), 0);
 
-				importedKBArticle = KBArticleLocalServiceUtil.addKBArticle(
-					curUserId, parentResourcePrimKey, curKBArticle.getTitle(),
-					curKBArticle.getContent(), curKBArticle.getDescription(),
-					curSections, curDirName, serviceContext);
+			KBArticle existingKBArticle = KBArticleUtil.fetchByR_V(
+				resourcePrimaryKey, curKBArticle.getVersion());
+
+			if (existingKBArticle == null) {
+				existingKBArticle = KBArticleUtil.fetchByUUID_G(
+					curKBArticle.getUuid(),
+					portletDataContext.getScopeGroupId());
+			}
+
+			serviceContext.setUuid(curKBArticle.getUuid());
+
+			if (existingKBArticle == null) {
+				try {
+					existingKBArticle =
+						KBArticleLocalServiceUtil.getLatestKBArticle(
+							resourcePrimaryKey, WorkflowConstants.STATUS_ANY);
+				}
+				catch (NoSuchArticleException nsae) {
+				}
+
+				if (existingKBArticle == null) {
+					importedKBArticle = KBArticleLocalServiceUtil.addKBArticle(
+						curUserId, parentResourcePrimKey,
+						curKBArticle.getTitle(), curKBArticle.getContent(),
+						curKBArticle.getDescription(), curSections, curDirName,
+						serviceContext);
+
+					KBArticleLocalServiceUtil.updatePriority(
+						importedKBArticle.getResourcePrimKey(),
+						curKBArticle.getPriority());
+				}
+				else {
+					KBArticleLocalServiceUtil.updateKBArticle(
+						curUserId, existingKBArticle.getResourcePrimKey(),
+						curKBArticle.getTitle(), curKBArticle.getContent(),
+						curKBArticle.getDescription(), curSections, curDirName,
+						serviceContext);
+
+					KBArticleLocalServiceUtil.moveKBArticle(
+						curUserId, existingKBArticle.getResourcePrimKey(),
+						parentResourcePrimKey, curKBArticle.getPriority());
+
+					importedKBArticle =
+						KBArticleLocalServiceUtil.getLatestKBArticle(
+							existingKBArticle.getResourcePrimKey(),
+							WorkflowConstants.STATUS_APPROVED);
+				}
 			}
 			else {
-				importedKBArticle = KBArticleLocalServiceUtil.updateKBArticle(
-					curUserId, importedKBArticle.getResourcePrimKey(),
-					curKBArticle.getTitle(), curKBArticle.getContent(),
-					curKBArticle.getDescription(), curSections, curDirName,
-					serviceContext);
+				importedKBArticle = existingKBArticle;
+			}
+
+			if (!curKBArticle.isMain()) {
+				kbArticlePKs.put(
+					curKBArticle.getResourcePrimKey(),
+					importedKBArticle.getResourcePrimKey());
 			}
 		}
 

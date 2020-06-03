@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,7 @@
 
 package com.liferay.so.activities.model;
 
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
 
 import java.util.HashMap;
@@ -197,16 +198,96 @@ public class SocialActivityWrapper implements SocialActivity,
 		_socialActivity.persist();
 	}
 
+	public java.lang.String getClassName()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivity.getClassName();
+	}
+
+	public long getClassNameId()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivity.getClassNameId();
+	}
+
+	public long getClassPK()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivity.getClassPK();
+	}
+
+	public long getCompanyId()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivity.getCompanyId();
+	}
+
+	public long getCreateDate()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivity.getCreateDate();
+	}
+
+	public java.lang.String getExtraData()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivity.getExtraData();
+	}
+
 	public long getGroupId()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _socialActivity.getGroupId();
 	}
 
+	public long getMirrorActivityId()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivity.getMirrorActivityId();
+	}
+
 	public com.liferay.portlet.social.model.SocialActivity getPortalSocialActivity()
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		return _socialActivity.getPortalSocialActivity();
+	}
+
+	public long getReceiverUserId()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivity.getReceiverUserId();
+	}
+
+	public int getType()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivity.getType();
+	}
+
+	public long getUserId()
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivity.getUserId();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof SocialActivityWrapper)) {
+			return false;
+		}
+
+		SocialActivityWrapper socialActivityWrapper = (SocialActivityWrapper)obj;
+
+		if (Validator.equals(_socialActivity,
+					socialActivityWrapper._socialActivity)) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

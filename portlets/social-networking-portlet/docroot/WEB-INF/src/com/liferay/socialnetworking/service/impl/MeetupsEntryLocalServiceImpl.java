@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,11 +14,12 @@
 
 package com.liferay.socialnetworking.service.impl;
 
+import com.liferay.compat.portal.kernel.util.ArrayUtil;
+import com.liferay.compat.portal.util.PortalUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.model.User;
 import com.liferay.portal.service.ImageLocalServiceUtil;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.socialnetworking.MeetupsEntryEndDateException;
 import com.liferay.socialnetworking.MeetupsEntryStartDateException;
 import com.liferay.socialnetworking.model.MeetupsEntry;
@@ -73,13 +74,13 @@ public class MeetupsEntryLocalServiceImpl
 		meetupsEntry.setMaxAttendees(maxAttendees);
 		meetupsEntry.setPrice(price);
 
-		if ((thumbnail != null) && (thumbnail.length > 0)) {
+		if (ArrayUtil.isNotEmpty(thumbnail)) {
 			meetupsEntry.setThumbnailId(counterLocalService.increment());
 		}
 
 		meetupsEntryPersistence.update(meetupsEntry, false);
 
-		if ((thumbnail != null) && (thumbnail.length > 0)) {
+		if (ArrayUtil.isNotEmpty(thumbnail)) {
 			ImageLocalServiceUtil.updateImage(
 				meetupsEntry.getThumbnailId(), thumbnail);
 		}
@@ -155,7 +156,7 @@ public class MeetupsEntryLocalServiceImpl
 
 		meetupsEntryPersistence.update(meetupsEntry, false);
 
-		if ((thumbnail != null) && (thumbnail.length > 0)) {
+		if (ArrayUtil.isNotEmpty(thumbnail)) {
 			ImageLocalServiceUtil.updateImage(
 				meetupsEntry.getThumbnailId(), thumbnail);
 		}

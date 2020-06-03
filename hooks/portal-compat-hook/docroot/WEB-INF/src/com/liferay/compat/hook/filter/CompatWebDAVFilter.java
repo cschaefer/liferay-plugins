@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,8 +14,8 @@
 
 package com.liferay.compat.hook.filter;
 
+import com.liferay.compat.portal.kernel.util.HttpUtil;
 import com.liferay.compat.portal.kernel.webdav.WebDAVUtil;
-import com.liferay.portal.kernel.util.HttpUtil;
 
 import java.io.IOException;
 
@@ -32,9 +32,11 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class CompatWebDAVFilter implements Filter {
 
+	@Override
 	public void destroy() {
 	}
 
+	@Override
 	public void doFilter(
 			ServletRequest servletRequest, ServletResponse servletResponse,
 			FilterChain filterChain)
@@ -66,6 +68,7 @@ public class CompatWebDAVFilter implements Filter {
 		}
 	}
 
+	@Override
 	public void init(FilterConfig filterConfig) {
 	}
 

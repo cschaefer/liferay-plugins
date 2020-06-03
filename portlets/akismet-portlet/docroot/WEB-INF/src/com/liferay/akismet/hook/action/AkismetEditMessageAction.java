@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -15,11 +15,11 @@
 package com.liferay.akismet.hook.action;
 
 import com.liferay.akismet.util.AkismetUtil;
+import com.liferay.compat.portal.util.PortalUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.servlet.SessionErrors;
 import com.liferay.portal.kernel.struts.BaseStrutsPortletAction;
-import com.liferay.portal.kernel.struts.StrutsPortletAction;
 import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.WebKeys;
@@ -31,17 +31,12 @@ import com.liferay.portal.security.permission.PermissionThreadLocal;
 import com.liferay.portal.service.ServiceContext;
 import com.liferay.portal.service.ServiceContextFactory;
 import com.liferay.portal.theme.ThemeDisplay;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.messageboards.model.MBMessage;
 import com.liferay.portlet.messageboards.service.MBMessageLocalServiceUtil;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
 import javax.portlet.PortletConfig;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
-import javax.portlet.ResourceRequest;
-import javax.portlet.ResourceResponse;
 
 /**
  * @author Amos Fong
@@ -51,7 +46,6 @@ public class AkismetEditMessageAction extends BaseStrutsPortletAction {
 
 	@Override
 	public void processAction(
-			StrutsPortletAction originalStrutsPortletAction,
 			PortletConfig portletConfig, ActionRequest actionRequest,
 			ActionResponse actionResponse)
 		throws Exception {
@@ -74,32 +68,6 @@ public class AkismetEditMessageAction extends BaseStrutsPortletAction {
 				SessionErrors.add(actionRequest, e.getClass());
 			}
 		}
-		else {
-			originalStrutsPortletAction.processAction(
-				portletConfig, actionRequest, actionResponse);
-		}
-	}
-
-	@Override
-	public String render(
-			StrutsPortletAction originalStrutsPortletAction,
-			PortletConfig portletConfig, RenderRequest renderRequest,
-			RenderResponse renderResponse)
-		throws Exception {
-
-		return originalStrutsPortletAction.render(
-			portletConfig, renderRequest, renderResponse);
-	}
-
-	@Override
-	public void serveResource(
-			StrutsPortletAction originalStrutsPortletAction,
-			PortletConfig portletConfig, ResourceRequest resourceRequest,
-			ResourceResponse resourceResponse)
-		throws Exception {
-
-		originalStrutsPortletAction.serveResource(
-			portletConfig, resourceRequest, resourceResponse);
 	}
 
 	protected void checkPermission(long scopeGroupId) throws PortalException {

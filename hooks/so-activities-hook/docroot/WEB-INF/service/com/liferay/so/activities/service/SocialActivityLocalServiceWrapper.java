@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -271,10 +271,10 @@ public class SocialActivityLocalServiceWrapper
 			arguments);
 	}
 
-	public void addActivity(long activitySetId, long activityId)
+	public void addActivity(long activityId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		_socialActivityLocalService.addActivity(activitySetId, activityId);
+		_socialActivityLocalService.addActivity(activityId);
 	}
 
 	public void deleteActivities(long[] activityIds)
@@ -287,6 +287,20 @@ public class SocialActivityLocalServiceWrapper
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
 		_socialActivityLocalService.deleteActivity(activityId);
+	}
+
+	public com.liferay.so.activities.model.SocialActivity getActivity(
+		long activityId)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivityLocalService.getActivity(activityId);
+	}
+
+	public java.util.List<com.liferay.so.activities.model.SocialActivity> getActivitySetActivities(
+		long activitySetId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivityLocalService.getActivitySetActivities(activitySetId,
+			start, end);
 	}
 
 	/**

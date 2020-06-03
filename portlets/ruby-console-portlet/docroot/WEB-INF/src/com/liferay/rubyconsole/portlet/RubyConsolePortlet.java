@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,6 +21,9 @@ import com.liferay.portal.kernel.util.Constants;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.ParamUtil;
 import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.security.auth.AuthTokenUtil;
+import com.liferay.portal.security.auth.PrincipalException;
+import com.liferay.portal.util.PortalUtil;
 import com.liferay.util.bridges.ruby.RubyPortlet;
 
 import java.io.IOException;
@@ -28,6 +31,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 import javax.portlet.MimeResponse;
+import javax.portlet.PortletException;
 import javax.portlet.PortletRequest;
 import javax.portlet.PortletResponse;
 import javax.portlet.ResourceRequest;
@@ -42,6 +46,16 @@ public class RubyConsolePortlet extends RubyPortlet {
 	public void serveResource(
 			ResourceRequest resourceRequest, ResourceResponse resourceResponse)
 		throws IOException {
+
+		try {
+			AuthTokenUtil.checkCSRFToken(
+				PortalUtil.getOriginalServletRequest(
+					PortalUtil.getHttpServletRequest(resourceRequest)),
+				RubyConsolePortlet.class.getName());
+		}
+		catch (PrincipalException pe) {
+			return;
+		}
 
 		String cmd = ParamUtil.getString(resourceRequest, Constants.CMD);
 

@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This file is part of Liferay Social Office. Liferay Social Office is free
  * software: you can redistribute it and/or modify it under the terms of the GNU
@@ -53,7 +53,13 @@ else if (filterBy.startsWith(ContactsConstants.FILTER_BY_GROUP)) {
 List<BaseModel<?>> contacts = null;
 int contactsCount = 0;
 
-if (userPublicPage || showOnlySiteMembers || !filterBy.equals(ContactsConstants.FILTER_BY_DEFAULT)) {
+if (userPublicPage) {
+	List<User> users = UserLocalServiceUtil.getSocialUsers(group.getClassPK(), SocialRelationConstants.TYPE_BI_CONNECTION, 0, ContactsConstants.MAX_RESULT_COUNT, new UserLastNameComparator(true));
+
+	contacts = new ArrayList<BaseModel<?>>(users);
+	contactsCount = UserLocalServiceUtil.getSocialUsersCount(group.getClassPK(), SocialRelationConstants.TYPE_BI_CONNECTION);
+}
+else if (showOnlySiteMembers || !filterBy.equals(ContactsConstants.FILTER_BY_DEFAULT)) {
 	List<User> users = UserLocalServiceUtil.search(company.getCompanyId(), name, WorkflowConstants.STATUS_APPROVED, params, 0, ContactsConstants.MAX_RESULT_COUNT, new UserLastNameComparator(true));
 
 	contacts = new ArrayList<BaseModel<?>>(users);
@@ -73,7 +79,7 @@ portletURL.setWindowState(WindowState.NORMAL);
 	<c:when test="<%= userPublicPage && (contactsCount <= 0) %>">
 		<aui:layout cssClass="contacts-center-home">
 			<h3 class="header-title">
-				<liferay-ui:message arguments="<%= new Object[] {group.getDescriptiveName(locale), String.valueOf(contactsCount)} %>" key="x-has-no-contacts" />
+				<liferay-ui:message arguments="<%= new Object[] {group.getDescriptiveName(locale), String.valueOf(contactsCount)} %>" key='<%= userPublicPage ? "x-has-no-connections" : "x-has-no-contacts" %>' />
 			</h3>
 		</aui:layout>
 	</c:when>
@@ -85,29 +91,18 @@ portletURL.setWindowState(WindowState.NORMAL);
 			<aui:input name="type" type="hidden" value="" />
 
 			<aui:layout cssClass="toolbar">
-				<aui:column columnWidth="30" cssClass="search-column">
-					<div class="lfr-search-column contacts-search aui-search-bar">
-						<aui:input cssClass="search-input" id="name" label="" name="name" size="30" type="text" value="<%= HtmlUtil.escape(name) %>" />
-					</div>
-				</aui:column>
-
-				<aui:column columnWidth="70" cssClass="button-column">
-					<div id="<portlet:namespace/>userToolbarButtons"><!-- --></div>
-
-					<div class="aui-helper-hidden" id="<portlet:namespace/>contactCenterToolbarButtons">
-						<liferay-util:include page="/contacts_center/contacts_center_toolbar.jsp" servletContext="<%= application %>" />
-					</div>
-				</aui:column>
-			</aui:layout>
-
-			<aui:layout cssClass="contacts-result-container lfr-app-column-view">
-				<aui:column columnWidth="30" cssClass="contacts-list" first="<%= true %>">
+				<div class="filter-container">
 					<aui:layout cssClass="contact-group-filter">
 						<aui:button name="checkAll" type="checkbox" />
 
 						<c:if test="<%= !userPublicPage %>">
 							<aui:select cssClass="contact-group-filter-select" inlineField="true" label="" name="filterBy">
 								<aui:option label="all" selected="<%= filterBy.equals(ContactsConstants.FILTER_BY_DEFAULT) %>" value="<%= ContactsConstants.FILTER_BY_DEFAULT %>" />
+
+								<c:if test="<%= showOnlySiteMembers %>">
+									<aui:option label="administrators" selected="<%= filterBy.equals(ContactsConstants.FILTER_BY_ADMINS) %>" value="<%= ContactsConstants.FILTER_BY_ADMINS %>" />
+								</c:if>
+
 								<aui:option label="connections" selected="<%= filterBy.equals(ContactsConstants.FILTER_BY_TYPE_BI_CONNECTION) %>" value="<%= ContactsConstants.FILTER_BY_TYPE_BI_CONNECTION %>" />
 								<aui:option label="following" selected="<%= filterBy.equals(ContactsConstants.FILTER_BY_TYPE_UNI_FOLLOWER) %>" value="<%= ContactsConstants.FILTER_BY_TYPE_UNI_FOLLOWER %>" />
 
@@ -122,7 +117,6 @@ portletURL.setWindowState(WindowState.NORMAL);
 
 										<%
 										for (Group curGroup : groups) {
-
 											String filterByGroupId = ContactsConstants.FILTER_BY_GROUP + curGroup.getGroupId();
 										%>
 
@@ -135,14 +129,24 @@ portletURL.setWindowState(WindowState.NORMAL);
 									</optgroup>
 								</c:if>
 							</aui:select>
-
-							<c:if test="<%= !showOnlySiteMembers %>">
-								<span class="add-contact">
-									<aui:a href="javascript:;" label="add" />
-								</span>
-							</c:if>
 						</c:if>
 					</aui:layout>
+				</div>
+
+				<c:if test="<%= !showOnlySiteMembers %>">
+					<button class="add-contact aui-buttonitem-content yui3-widget aui-component aui-buttonitem aui-state-default aui-buttonitem-icon-label" id="<portlet:namespace/>add-contact" type="button" value="add-contact">
+						<span class="aui-buttonitem-icon aui-icon aui-icon-add"></span>
+
+						<span class="aui-buttonitem-label"><liferay-ui:message key="add-contact" /></span>
+					</button>
+				</c:if>
+			</aui:layout>
+
+			<aui:layout cssClass="contacts-result-container lfr-app-column-view">
+				<aui:column columnWidth="30" cssClass="contacts-list" first="<%= true %>">
+					<div class="lfr-search-column contacts-search aui-search-bar">
+						<aui:input cssClass="search-input" id="name" label="" name="name" size="30" type="text" value="<%= HtmlUtil.escape(name) %>" />
+					</div>
 
 					<aui:layout cssClass='<%= userPublicPage ? "contacts-result personal-contact-list" : "contacts-result" %>'>
 
@@ -285,6 +289,12 @@ portletURL.setWindowState(WindowState.NORMAL);
 				</aui:column>
 
 				<aui:column columnWidth="70" cssClass="contacts-container">
+					<div id="<portlet:namespace/>userToolbarButtons"><!-- --></div>
+
+					<div class="aui-helper-hidden" id="<portlet:namespace/>contactCenterToolbarButtons">
+						<liferay-util:include page="/contacts_center/contacts_center_toolbar.jsp" servletContext="<%= application %>" />
+					</div>
+
 					<div id="<portlet:namespace/>messageContainer"></div>
 
 					<div id="<portlet:namespace/>detailUserView">
@@ -376,6 +386,25 @@ portletURL.setWindowState(WindowState.NORMAL);
 					contactsSearchInput: '#<portlet:namespace />name',
 					defaultMessageError: '<liferay-ui:message key="an-error-occurred-while-retrieving-the-users-information" unicode="<%= true %>" />',
 					defaultMessageSuccess: '<liferay-ui:message key="your-request-completed-successfully" unicode="<%= true %>" />',
+
+					<%
+					LiferayPortletURL deleteEntryURL = PortletURLFactoryUtil.create(request, "1_WAR_contactsportlet", layout.getPlid(), PortletRequest.ACTION_PHASE);
+
+					deleteEntryURL.setParameter("javax.portlet.action", "deleteEntry");
+					deleteEntryURL.setWindowState(WindowState.NORMAL);
+					%>
+
+					deleteEntryURL: '<%= deleteEntryURL %>',
+
+					<%
+					LiferayPortletURL editEntryURL = PortletURLFactoryUtil.create(request, "1_WAR_contactsportlet", layout.getPlid(), PortletRequest.RENDER_PHASE);
+
+					editEntryURL.setParameter("mvcPath", "/contacts_center/edit_entry.jsp");
+					editEntryURL.setWindowState(LiferayWindowState.EXCLUSIVE);
+					%>
+
+					editEntryURL: '<%= editEntryURL %>',
+
 					getSelectedContactsURL: '<portlet:resourceURL id="getSelectedContacts" />',
 					maxResultCount: <%= ContactsConstants.MAX_RESULT_COUNT %>,
 					namespace: '<portlet:namespace />',
@@ -526,55 +555,75 @@ portletURL.setWindowState(WindowState.NORMAL);
 				var contactsCenterHome = A.one('.contacts-portlet .contacts-center-home');
 
 				<c:if test="<%= !showOnlySiteMembers %>">
-					A.one('.contacts-portlet .add-contact').on(
-						'click',
-						function(event) {
-							contactsCenter.showPopup('<%= LanguageUtil.get(pageContext, "add-contact") %>', '<portlet:renderURL windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="mvcPath" value="/contacts_center/edit_entry.jsp" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:renderURL>');
-						}
-					);
+					var addContact = A.one('#<portlet:namespace/>add-contact');
 
-					contactsCenterHome.one('.contacts').on(
+					if (addContact) {
+						addContact.on(
+							'click',
+							function(event) {
+								contactsCenter.showPopup('<%= LanguageUtil.get(pageContext, "add-contact") %>', '<portlet:renderURL windowState="<%= LiferayWindowState.EXCLUSIVE.toString() %>"><portlet:param name="mvcPath" value="/contacts_center/edit_entry.jsp" /><portlet:param name="redirect" value="<%= currentURL %>" /></portlet:renderURL>');
+							}
+						);
+					}
+
+					var contacts = contactsCenterHome.one('.contacts');
+
+					if (contacts) {
+						contacts.on(
+							'click',
+							function(event) {
+								contactFilterSelect.set('value', '<%= ContactsConstants.FILTER_BY_TYPE_MY_CONTACTS %>');
+
+								contactsCenter.updateContacts(searchInput.get('value'), contactFilterSelect.get('value'));
+							},
+							'a'
+						);
+					}
+				</c:if>
+
+				var connections = contactsCenterHome.one('.connections');
+
+				if (connections) {
+					connections.on(
 						'click',
 						function(event) {
-							contactFilterSelect.set('value', '<%= ContactsConstants.FILTER_BY_TYPE_MY_CONTACTS %>');
+							contactFilterSelect.set('value', '<%= ContactsConstants.FILTER_BY_TYPE_BI_CONNECTION %>');
 
 							contactsCenter.updateContacts(searchInput.get('value'), contactFilterSelect.get('value'));
 						},
 						'a'
 					);
-				</c:if>
+				}
 
-				contactsCenterHome.one('.connections').on(
-					'click',
-					function(event) {
-						contactFilterSelect.set('value', '<%= ContactsConstants.FILTER_BY_TYPE_BI_CONNECTION %>');
+				var following = contactsCenterHome.one('.followings');
 
-						contactsCenter.updateContacts(searchInput.get('value'), contactFilterSelect.get('value'));
-					},
-					'a'
-				);
+				if (following) {
+					following.on(
+						'click',
+						function(event) {
+							contactFilterSelect.set('value', '<%= ContactsConstants.FILTER_BY_TYPE_UNI_FOLLOWER %>');
 
-				contactsCenterHome.one('.followings').on(
-					'click',
-					function(event) {
-						contactFilterSelect.set('value', '<%= ContactsConstants.FILTER_BY_TYPE_UNI_FOLLOWER %>');
+							contactsCenter.updateContacts(searchInput.get('value'), contactFilterSelect.get('value'));
+						},
+						'a'
+					);
+				}
 
-						contactsCenter.updateContacts(searchInput.get('value'), contactFilterSelect.get('value'));
-					},
-					'a'
-				);
+				var all = contactsCenterHome.one('.all');
 
-				contactsCenterHome.one('.all').on(
-					'click',
-					function(event) {
-						contactFilterSelect.set('value', '<%= ContactsConstants.FILTER_BY_DEFAULT %>');
+				if (all) {
+					all.on(
+						'click',
+						function(event) {
+							contactFilterSelect.set('value', '<%= ContactsConstants.FILTER_BY_DEFAULT %>');
 
-						searchInput.set('value', '');
+							searchInput.set('value', '');
 
-						contactsCenter.updateContacts(searchInput.get('value'), contactFilterSelect.get('value'));
-					},
-					'a'
-				);
+							contactsCenter.updateContacts(searchInput.get('value'), contactFilterSelect.get('value'));
+						},
+						'a'
+					);
+				}
 			</c:if>
 		</aui:script>
 	</c:otherwise>

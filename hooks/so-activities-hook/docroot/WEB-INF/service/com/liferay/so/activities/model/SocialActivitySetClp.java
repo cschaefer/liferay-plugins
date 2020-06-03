@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -24,9 +24,12 @@ import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 import com.liferay.portal.util.PortalUtil;
 
+import com.liferay.so.activities.service.ClpSerializer;
 import com.liferay.so.activities.service.SocialActivitySetLocalServiceUtil;
 
 import java.io.Serializable;
+
+import java.lang.reflect.Method;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -76,6 +79,7 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 		attributes.put("classNameId", getClassNameId());
 		attributes.put("classPK", getClassPK());
 		attributes.put("type", getType());
+		attributes.put("extraData", getExtraData());
 		attributes.put("activityCount", getActivityCount());
 
 		return attributes;
@@ -137,6 +141,12 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 			setType(type);
 		}
 
+		String extraData = (String)attributes.get("extraData");
+
+		if (extraData != null) {
+			setExtraData(extraData);
+		}
+
 		Integer activityCount = (Integer)attributes.get("activityCount");
 
 		if (activityCount != null) {
@@ -150,6 +160,19 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	public void setActivitySetId(long activitySetId) {
 		_activitySetId = activitySetId;
+
+		if (_socialActivitySetRemoteModel != null) {
+			try {
+				Class<?> clazz = _socialActivitySetRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setActivitySetId", long.class);
+
+				method.invoke(_socialActivitySetRemoteModel, activitySetId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public long getGroupId() {
@@ -158,6 +181,19 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	public void setGroupId(long groupId) {
 		_groupId = groupId;
+
+		if (_socialActivitySetRemoteModel != null) {
+			try {
+				Class<?> clazz = _socialActivitySetRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setGroupId", long.class);
+
+				method.invoke(_socialActivitySetRemoteModel, groupId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public long getCompanyId() {
@@ -166,6 +202,19 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	public void setCompanyId(long companyId) {
 		_companyId = companyId;
+
+		if (_socialActivitySetRemoteModel != null) {
+			try {
+				Class<?> clazz = _socialActivitySetRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setCompanyId", long.class);
+
+				method.invoke(_socialActivitySetRemoteModel, companyId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public long getUserId() {
@@ -174,6 +223,19 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	public void setUserId(long userId) {
 		_userId = userId;
+
+		if (_socialActivitySetRemoteModel != null) {
+			try {
+				Class<?> clazz = _socialActivitySetRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setUserId", long.class);
+
+				method.invoke(_socialActivitySetRemoteModel, userId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public String getUserUuid() throws SystemException {
@@ -190,6 +252,19 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	public void setCreateDate(long createDate) {
 		_createDate = createDate;
+
+		if (_socialActivitySetRemoteModel != null) {
+			try {
+				Class<?> clazz = _socialActivitySetRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setCreateDate", long.class);
+
+				method.invoke(_socialActivitySetRemoteModel, createDate);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public long getModifiedDate() {
@@ -198,6 +273,19 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	public void setModifiedDate(long modifiedDate) {
 		_modifiedDate = modifiedDate;
+
+		if (_socialActivitySetRemoteModel != null) {
+			try {
+				Class<?> clazz = _socialActivitySetRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setModifiedDate", long.class);
+
+				method.invoke(_socialActivitySetRemoteModel, modifiedDate);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public String getClassName() {
@@ -224,6 +312,19 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	public void setClassNameId(long classNameId) {
 		_classNameId = classNameId;
+
+		if (_socialActivitySetRemoteModel != null) {
+			try {
+				Class<?> clazz = _socialActivitySetRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setClassNameId", long.class);
+
+				method.invoke(_socialActivitySetRemoteModel, classNameId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public long getClassPK() {
@@ -232,6 +333,19 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	public void setClassPK(long classPK) {
 		_classPK = classPK;
+
+		if (_socialActivitySetRemoteModel != null) {
+			try {
+				Class<?> clazz = _socialActivitySetRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setClassPK", long.class);
+
+				method.invoke(_socialActivitySetRemoteModel, classPK);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public int getType() {
@@ -240,6 +354,40 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	public void setType(int type) {
 		_type = type;
+
+		if (_socialActivitySetRemoteModel != null) {
+			try {
+				Class<?> clazz = _socialActivitySetRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setType", int.class);
+
+				method.invoke(_socialActivitySetRemoteModel, type);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
+	}
+
+	public String getExtraData() {
+		return _extraData;
+	}
+
+	public void setExtraData(String extraData) {
+		_extraData = extraData;
+
+		if (_socialActivitySetRemoteModel != null) {
+			try {
+				Class<?> clazz = _socialActivitySetRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setExtraData", String.class);
+
+				method.invoke(_socialActivitySetRemoteModel, extraData);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public int getActivityCount() {
@@ -248,6 +396,19 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	public void setActivityCount(int activityCount) {
 		_activityCount = activityCount;
+
+		if (_socialActivitySetRemoteModel != null) {
+			try {
+				Class<?> clazz = _socialActivitySetRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setActivityCount", int.class);
+
+				method.invoke(_socialActivitySetRemoteModel, activityCount);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public BaseModel<?> getSocialActivitySetRemoteModel() {
@@ -257,6 +418,47 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 	public void setSocialActivitySetRemoteModel(
 		BaseModel<?> socialActivitySetRemoteModel) {
 		_socialActivitySetRemoteModel = socialActivitySetRemoteModel;
+	}
+
+	public Object invokeOnRemoteModel(String methodName,
+		Class<?>[] parameterTypes, Object[] parameterValues)
+		throws Exception {
+		Object[] remoteParameterValues = new Object[parameterValues.length];
+
+		for (int i = 0; i < parameterValues.length; i++) {
+			if (parameterValues[i] != null) {
+				remoteParameterValues[i] = ClpSerializer.translateInput(parameterValues[i]);
+			}
+		}
+
+		Class<?> remoteModelClass = _socialActivitySetRemoteModel.getClass();
+
+		ClassLoader remoteModelClassLoader = remoteModelClass.getClassLoader();
+
+		Class<?>[] remoteParameterTypes = new Class[parameterTypes.length];
+
+		for (int i = 0; i < parameterTypes.length; i++) {
+			if (parameterTypes[i].isPrimitive()) {
+				remoteParameterTypes[i] = parameterTypes[i];
+			}
+			else {
+				String parameterTypeName = parameterTypes[i].getName();
+
+				remoteParameterTypes[i] = remoteModelClassLoader.loadClass(parameterTypeName);
+			}
+		}
+
+		Method method = remoteModelClass.getMethod(methodName,
+				remoteParameterTypes);
+
+		Object returnValue = method.invoke(_socialActivitySetRemoteModel,
+				remoteParameterValues);
+
+		if (returnValue != null) {
+			returnValue = ClpSerializer.translateOutput(returnValue);
+		}
+
+		return returnValue;
 	}
 
 	public void persist() throws SystemException {
@@ -292,6 +494,7 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 		clone.setClassNameId(getClassNameId());
 		clone.setClassPK(getClassPK());
 		clone.setType(getType());
+		clone.setExtraData(getExtraData());
 		clone.setActivityCount(getActivityCount());
 
 		return clone;
@@ -321,18 +524,15 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof SocialActivitySetClp)) {
 			return false;
 		}
 
-		SocialActivitySetClp socialActivitySet = null;
-
-		try {
-			socialActivitySet = (SocialActivitySetClp)obj;
-		}
-		catch (ClassCastException cce) {
-			return false;
-		}
+		SocialActivitySetClp socialActivitySet = (SocialActivitySetClp)obj;
 
 		long primaryKey = socialActivitySet.getPrimaryKey();
 
@@ -351,7 +551,7 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 
 	@Override
 	public String toString() {
-		StringBundler sb = new StringBundler(21);
+		StringBundler sb = new StringBundler(23);
 
 		sb.append("{activitySetId=");
 		sb.append(getActivitySetId());
@@ -371,6 +571,8 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 		sb.append(getClassPK());
 		sb.append(", type=");
 		sb.append(getType());
+		sb.append(", extraData=");
+		sb.append(getExtraData());
 		sb.append(", activityCount=");
 		sb.append(getActivityCount());
 		sb.append("}");
@@ -379,7 +581,7 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 	}
 
 	public String toXmlString() {
-		StringBundler sb = new StringBundler(34);
+		StringBundler sb = new StringBundler(37);
 
 		sb.append("<model><model-name>");
 		sb.append("com.liferay.so.activities.model.SocialActivitySet");
@@ -422,6 +624,10 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 		sb.append(getType());
 		sb.append("]]></column-value></column>");
 		sb.append(
+			"<column><column-name>extraData</column-name><column-value><![CDATA[");
+		sb.append(getExtraData());
+		sb.append("]]></column-value></column>");
+		sb.append(
 			"<column><column-name>activityCount</column-name><column-value><![CDATA[");
 		sb.append(getActivityCount());
 		sb.append("]]></column-value></column>");
@@ -441,6 +647,7 @@ public class SocialActivitySetClp extends BaseModelImpl<SocialActivitySet>
 	private long _classNameId;
 	private long _classPK;
 	private int _type;
+	private String _extraData;
 	private int _activityCount;
 	private BaseModel<?> _socialActivitySetRemoteModel;
 }

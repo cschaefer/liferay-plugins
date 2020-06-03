@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -24,31 +24,10 @@
 		iteratorURL="<%= portletURL %>"
 		rowChecker="<%= new RowChecker(renderResponse) %>"
 	>
-		<liferay-ui:search-container-results>
-
-			<%
-			DynamicQuery wikiPageDynamicQuery = DynamicQueryFactoryUtil.forClass(WikiPage.class);
-
-			Property groupIdProperty = PropertyFactoryUtil.forName("groupId");
-
-			wikiPageDynamicQuery.add(groupIdProperty.eq(scopeGroupId));
-
-			Property summaryProperty = PropertyFactoryUtil.forName("summary");
-
-			wikiPageDynamicQuery.add(summaryProperty.eq(AkismetConstants.WIKI_PAGE_PENDING_APPROVAL));
-
-			Property statusProperty = PropertyFactoryUtil.forName("status");
-
-			wikiPageDynamicQuery.add(statusProperty.eq(WorkflowConstants.STATUS_DENIED));
-
-			results = WikiPageLocalServiceUtil.dynamicQuery(wikiPageDynamicQuery, searchContainer.getStart(), searchContainer.getEnd());
-			total = (int)WikiPageLocalServiceUtil.dynamicQueryCount(wikiPageDynamicQuery);
-
-			pageContext.setAttribute("results", results);
-			pageContext.setAttribute("total", total);
-			%>
-
-		</liferay-ui:search-container-results>
+		<liferay-ui:search-container-results
+			results="<%= ModerationUtil.getWikiPages(scopeGroupId, searchContainer.getStart(), searchContainer.getEnd()) %>"
+			total="<%= ModerationUtil.getWikiPagesCount(scopeGroupId) %>"
+		/>
 
 		<c:if test="<%= !results.isEmpty() %>">
 			<aui:button-row>

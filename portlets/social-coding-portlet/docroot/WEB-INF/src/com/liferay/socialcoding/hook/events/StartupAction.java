@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,11 +14,11 @@
 
 package com.liferay.socialcoding.hook.events;
 
+import com.liferay.compat.portal.util.PortalUtil;
 import com.liferay.portal.kernel.events.ActionException;
 import com.liferay.portal.kernel.events.SimpleAction;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.model.User;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.expando.DuplicateColumnNameException;
 import com.liferay.portlet.expando.DuplicateTableNameException;
 import com.liferay.portlet.expando.model.ExpandoColumnConstants;
@@ -43,11 +43,11 @@ public class StartupAction extends SimpleAction {
 
 	protected void doRun(long companyId) throws Exception {
 		if (companyId == PortalUtil.getDefaultCompanyId()) {
-			setupExpando(companyId);
+			setUpExpando(companyId);
 		}
 	}
 
-	protected void setupExpando(long companyId) throws Exception {
+	protected void setUpExpando(long companyId) throws Exception {
 		ExpandoTable table = null;
 
 		try {

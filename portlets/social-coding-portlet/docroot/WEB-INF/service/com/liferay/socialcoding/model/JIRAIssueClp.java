@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -22,9 +22,12 @@ import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.model.BaseModel;
 import com.liferay.portal.model.impl.BaseModelImpl;
 
+import com.liferay.socialcoding.service.ClpSerializer;
 import com.liferay.socialcoding.service.JIRAIssueLocalServiceUtil;
 
 import java.io.Serializable;
+
+import java.lang.reflect.Method;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -69,7 +72,7 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("projectId", getProjectId());
-		attributes.put("key", getKey());
+		attributes.put("issueNumber", getIssueNumber());
 		attributes.put("summary", getSummary());
 		attributes.put("description", getDescription());
 		attributes.put("reporterJiraUserId", getReporterJiraUserId());
@@ -106,10 +109,10 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 			setProjectId(projectId);
 		}
 
-		String key = (String)attributes.get("key");
+		Long issueNumber = (Long)attributes.get("issueNumber");
 
-		if (key != null) {
-			setKey(key);
+		if (issueNumber != null) {
+			setIssueNumber(issueNumber);
 		}
 
 		String summary = (String)attributes.get("summary");
@@ -155,6 +158,19 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	public void setJiraIssueId(long jiraIssueId) {
 		_jiraIssueId = jiraIssueId;
+
+		if (_jiraIssueRemoteModel != null) {
+			try {
+				Class<?> clazz = _jiraIssueRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setJiraIssueId", long.class);
+
+				method.invoke(_jiraIssueRemoteModel, jiraIssueId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public Date getCreateDate() {
@@ -163,6 +179,19 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	public void setCreateDate(Date createDate) {
 		_createDate = createDate;
+
+		if (_jiraIssueRemoteModel != null) {
+			try {
+				Class<?> clazz = _jiraIssueRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setCreateDate", Date.class);
+
+				method.invoke(_jiraIssueRemoteModel, createDate);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public Date getModifiedDate() {
@@ -171,6 +200,19 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	public void setModifiedDate(Date modifiedDate) {
 		_modifiedDate = modifiedDate;
+
+		if (_jiraIssueRemoteModel != null) {
+			try {
+				Class<?> clazz = _jiraIssueRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setModifiedDate", Date.class);
+
+				method.invoke(_jiraIssueRemoteModel, modifiedDate);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public long getProjectId() {
@@ -179,14 +221,40 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	public void setProjectId(long projectId) {
 		_projectId = projectId;
+
+		if (_jiraIssueRemoteModel != null) {
+			try {
+				Class<?> clazz = _jiraIssueRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setProjectId", long.class);
+
+				method.invoke(_jiraIssueRemoteModel, projectId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
-	public String getKey() {
-		return _key;
+	public long getIssueNumber() {
+		return _issueNumber;
 	}
 
-	public void setKey(String key) {
-		_key = key;
+	public void setIssueNumber(long issueNumber) {
+		_issueNumber = issueNumber;
+
+		if (_jiraIssueRemoteModel != null) {
+			try {
+				Class<?> clazz = _jiraIssueRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setIssueNumber", long.class);
+
+				method.invoke(_jiraIssueRemoteModel, issueNumber);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public String getSummary() {
@@ -195,6 +263,19 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	public void setSummary(String summary) {
 		_summary = summary;
+
+		if (_jiraIssueRemoteModel != null) {
+			try {
+				Class<?> clazz = _jiraIssueRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setSummary", String.class);
+
+				method.invoke(_jiraIssueRemoteModel, summary);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public String getDescription() {
@@ -203,6 +284,19 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	public void setDescription(String description) {
 		_description = description;
+
+		if (_jiraIssueRemoteModel != null) {
+			try {
+				Class<?> clazz = _jiraIssueRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setDescription", String.class);
+
+				method.invoke(_jiraIssueRemoteModel, description);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public String getReporterJiraUserId() {
@@ -211,6 +305,20 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	public void setReporterJiraUserId(String reporterJiraUserId) {
 		_reporterJiraUserId = reporterJiraUserId;
+
+		if (_jiraIssueRemoteModel != null) {
+			try {
+				Class<?> clazz = _jiraIssueRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setReporterJiraUserId",
+						String.class);
+
+				method.invoke(_jiraIssueRemoteModel, reporterJiraUserId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public String getAssigneeJiraUserId() {
@@ -219,6 +327,20 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	public void setAssigneeJiraUserId(String assigneeJiraUserId) {
 		_assigneeJiraUserId = assigneeJiraUserId;
+
+		if (_jiraIssueRemoteModel != null) {
+			try {
+				Class<?> clazz = _jiraIssueRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setAssigneeJiraUserId",
+						String.class);
+
+				method.invoke(_jiraIssueRemoteModel, assigneeJiraUserId);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public String getResolution() {
@@ -227,6 +349,19 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	public void setResolution(String resolution) {
 		_resolution = resolution;
+
+		if (_jiraIssueRemoteModel != null) {
+			try {
+				Class<?> clazz = _jiraIssueRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setResolution", String.class);
+
+				method.invoke(_jiraIssueRemoteModel, resolution);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
 	}
 
 	public String getStatus() {
@@ -235,6 +370,37 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	public void setStatus(String status) {
 		_status = status;
+
+		if (_jiraIssueRemoteModel != null) {
+			try {
+				Class<?> clazz = _jiraIssueRemoteModel.getClass();
+
+				Method method = clazz.getMethod("setStatus", String.class);
+
+				method.invoke(_jiraIssueRemoteModel, status);
+			}
+			catch (Exception e) {
+				throw new UnsupportedOperationException(e);
+			}
+		}
+	}
+
+	public java.lang.String getKey() {
+		try {
+			String methodName = "getKey";
+
+			Class<?>[] parameterTypes = new Class<?>[] {  };
+
+			Object[] parameterValues = new Object[] {  };
+
+			java.lang.String returnObj = (java.lang.String)invokeOnRemoteModel(methodName,
+					parameterTypes, parameterValues);
+
+			return returnObj;
+		}
+		catch (Exception e) {
+			throw new UnsupportedOperationException(e);
+		}
 	}
 
 	public BaseModel<?> getJIRAIssueRemoteModel() {
@@ -243,6 +409,47 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	public void setJIRAIssueRemoteModel(BaseModel<?> jiraIssueRemoteModel) {
 		_jiraIssueRemoteModel = jiraIssueRemoteModel;
+	}
+
+	public Object invokeOnRemoteModel(String methodName,
+		Class<?>[] parameterTypes, Object[] parameterValues)
+		throws Exception {
+		Object[] remoteParameterValues = new Object[parameterValues.length];
+
+		for (int i = 0; i < parameterValues.length; i++) {
+			if (parameterValues[i] != null) {
+				remoteParameterValues[i] = ClpSerializer.translateInput(parameterValues[i]);
+			}
+		}
+
+		Class<?> remoteModelClass = _jiraIssueRemoteModel.getClass();
+
+		ClassLoader remoteModelClassLoader = remoteModelClass.getClassLoader();
+
+		Class<?>[] remoteParameterTypes = new Class[parameterTypes.length];
+
+		for (int i = 0; i < parameterTypes.length; i++) {
+			if (parameterTypes[i].isPrimitive()) {
+				remoteParameterTypes[i] = parameterTypes[i];
+			}
+			else {
+				String parameterTypeName = parameterTypes[i].getName();
+
+				remoteParameterTypes[i] = remoteModelClassLoader.loadClass(parameterTypeName);
+			}
+		}
+
+		Method method = remoteModelClass.getMethod(methodName,
+				remoteParameterTypes);
+
+		Object returnValue = method.invoke(_jiraIssueRemoteModel,
+				remoteParameterValues);
+
+		if (returnValue != null) {
+			returnValue = ClpSerializer.translateOutput(returnValue);
+		}
+
+		return returnValue;
 	}
 
 	public void persist() throws SystemException {
@@ -272,7 +479,7 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 		clone.setCreateDate(getCreateDate());
 		clone.setModifiedDate(getModifiedDate());
 		clone.setProjectId(getProjectId());
-		clone.setKey(getKey());
+		clone.setIssueNumber(getIssueNumber());
 		clone.setSummary(getSummary());
 		clone.setDescription(getDescription());
 		clone.setReporterJiraUserId(getReporterJiraUserId());
@@ -300,18 +507,15 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof JIRAIssueClp)) {
 			return false;
 		}
 
-		JIRAIssueClp jiraIssue = null;
-
-		try {
-			jiraIssue = (JIRAIssueClp)obj;
-		}
-		catch (ClassCastException cce) {
-			return false;
-		}
+		JIRAIssueClp jiraIssue = (JIRAIssueClp)obj;
 
 		long primaryKey = jiraIssue.getPrimaryKey();
 
@@ -340,8 +544,8 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 		sb.append(getModifiedDate());
 		sb.append(", projectId=");
 		sb.append(getProjectId());
-		sb.append(", key=");
-		sb.append(getKey());
+		sb.append(", issueNumber=");
+		sb.append(getIssueNumber());
 		sb.append(", summary=");
 		sb.append(getSummary());
 		sb.append(", description=");
@@ -383,8 +587,8 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 		sb.append(getProjectId());
 		sb.append("]]></column-value></column>");
 		sb.append(
-			"<column><column-name>key</column-name><column-value><![CDATA[");
-		sb.append(getKey());
+			"<column><column-name>issueNumber</column-name><column-value><![CDATA[");
+		sb.append(getIssueNumber());
 		sb.append("]]></column-value></column>");
 		sb.append(
 			"<column><column-name>summary</column-name><column-value><![CDATA[");
@@ -420,7 +624,7 @@ public class JIRAIssueClp extends BaseModelImpl<JIRAIssue> implements JIRAIssue 
 	private Date _createDate;
 	private Date _modifiedDate;
 	private long _projectId;
-	private String _key;
+	private long _issueNumber;
 	private String _summary;
 	private String _description;
 	private String _reporterJiraUserId;

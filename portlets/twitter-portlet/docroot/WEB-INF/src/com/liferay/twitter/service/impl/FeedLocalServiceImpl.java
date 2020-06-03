@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.twitter.service.impl;
 
+import com.liferay.compat.portal.kernel.util.LocaleUtil;
+import com.liferay.compat.portal.util.PortalUtil;
 import com.liferay.portal.kernel.dao.orm.QueryUtil;
 import com.liferay.portal.kernel.dao.shard.ShardUtil;
 import com.liferay.portal.kernel.exception.PortalException;
@@ -28,7 +30,6 @@ import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.portal.model.Contact;
 import com.liferay.portal.model.User;
-import com.liferay.portal.util.PortalUtil;
 import com.liferay.portlet.social.service.SocialActivityLocalServiceUtil;
 import com.liferay.twitter.FeedTwitterScreenNameException;
 import com.liferay.twitter.model.Feed;
@@ -45,6 +46,7 @@ import java.util.List;
 
 /**
  * @author Brian Wing Shun Chan
+ * @author Zsolt Berentey
  */
 public class FeedLocalServiceImpl extends FeedLocalServiceBaseImpl {
 
@@ -103,8 +105,8 @@ public class FeedLocalServiceImpl extends FeedLocalServiceBaseImpl {
 			throw new FeedTwitterScreenNameException();
 		}
 
-		Feed feed = feedPersistence.fetchByC_TSN(
-			user.getCompanyId(), twitterScreenName);
+		Feed feed = feedPersistence.fetchByU_TSN(
+			user.getUserId(), twitterScreenName);
 
 		JSONArray jsonArray = null;
 
@@ -126,13 +128,8 @@ public class FeedLocalServiceImpl extends FeedLocalServiceBaseImpl {
 			feed.setTwitterScreenName(twitterScreenName);
 
 			feedPersistence.update(feed, false);
-
-			if (jsonArray == null) {
-				return;
-			}
 		}
-
-		if (jsonArray == null) {
+		else {
 			jsonArray = TimelineProcessorUtil.getUserTimelineJSONArray(
 				twitterScreenName, feed.getLastStatusId());
 		}
@@ -146,7 +143,7 @@ public class FeedLocalServiceImpl extends FeedLocalServiceBaseImpl {
 				JSONObject statusJSONObject = jsonArray.getJSONObject(i);
 
 				SimpleDateFormat sdf = new SimpleDateFormat(
-					"EEE MMM d hh:mm:ss Z yyyy");
+					"EEE MMM d hh:mm:ss Z yyyy", LocaleUtil.US);
 
 				Date createDate = null;
 

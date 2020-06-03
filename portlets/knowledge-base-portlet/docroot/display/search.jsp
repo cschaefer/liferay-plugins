@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -41,6 +41,7 @@ String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 		<%
 		SearchContext searchContext = SearchContextFactory.getInstance(request);
 
+		searchContext.setAttribute("paginationType", "regular");
 		searchContext.setEnd(searchContainer.getEnd());
 		searchContext.setKeywords(keywords);
 		searchContext.setStart(searchContainer.getStart());
@@ -55,11 +56,18 @@ String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 		for (int i = 0; i < hits.getDocs().length; i++) {
 			Object[] array = new Object[5];
 
-			array[0] = hits.doc(i).get(Field.ENTRY_CLASS_PK);
-			array[1] = hits.doc(i).get(Field.TITLE);
-			array[2] = hits.doc(i).get(Field.USER_NAME);
-			array[3] = hits.doc(i).getDate(Field.CREATE_DATE);
-			array[4] = hits.doc(i).getDate(Field.MODIFIED_DATE);
+			Document document = hits.doc(i);
+
+			array[0] = document.get(Field.ENTRY_CLASS_PK);
+			array[1] = document.get(Field.TITLE);
+
+			long userId = GetterUtil.getLong(document.get(Field.USER_ID));
+			String userName = document.get(Field.USER_NAME);
+
+			array[2] = PortalUtil.getUserName(userId, userName);
+
+			array[3] = document.getDate(Field.CREATE_DATE);
+			array[4] = document.getDate(Field.MODIFIED_DATE);
 
 			tuples.add(new Tuple(array));
 		}
@@ -83,7 +91,7 @@ String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 			href="<%= rowURL %>"
 			name="title"
 			orderable="<%= true %>"
-			value="<%= (String)tuple.getObject(1) %>"
+			value="<%= HtmlUtil.escape((String)tuple.getObject(1)) %>"
 		/>
 
 		<c:if test="<%= showKBArticleAuthorColumn %>">
@@ -92,7 +100,7 @@ String orderByType = ParamUtil.getString(request, "orderByType", "desc");
 				name="author"
 				orderable="<%= true %>"
 				orderableProperty="user-name"
-				value="<%= (String)tuple.getObject(2) %>"
+				value="<%= HtmlUtil.escape((String)tuple.getObject(2)) %>"
 			/>
 		</c:if>
 

@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This file is part of Liferay Social Office. Liferay Social Office is free
  * software: you can redistribute it and/or modify it under the terms of the GNU
@@ -23,29 +23,28 @@
 String tabs1 = ParamUtil.getString(request, "tabs1");
 
 String keywords = ParamUtil.getString(request, "keywords");
-String searchKeywords = DAOParamUtil.getLike(request, "keywords");
 
 List<Group> groups = null;
 int groupsCount = 0;
 
 if (tabs1.equals("my-sites")) {
-	groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), searchKeywords, true, 0, maxResultSize);
-	groupsCount = SitesUtil.getVisibleSitesCount(themeDisplay.getCompanyId(), themeDisplay.getUserId(), searchKeywords, true);
+	groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), keywords, true, 0, maxResultSize);
+	groupsCount = SitesUtil.getVisibleSitesCount(themeDisplay.getCompanyId(), themeDisplay.getUserId(), keywords, true);
 
 	if (groupsCount == 0) {
 		tabs1 = "all-sites";
 
-		groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), searchKeywords, false, 0, maxResultSize);
-		groupsCount = SitesUtil.getVisibleSitesCount(themeDisplay.getCompanyId(), themeDisplay.getUserId(), searchKeywords, false);
+		groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), keywords, false, 0, maxResultSize);
+		groupsCount = SitesUtil.getVisibleSitesCount(themeDisplay.getCompanyId(), themeDisplay.getUserId(), keywords, false);
 	}
 }
 else if (tabs1.equals("my-favorites")) {
-	groups = SitesUtil.getFavoriteSitesGroups(themeDisplay.getUserId(), searchKeywords, 0, maxResultSize);
-	groupsCount = SitesUtil.getFavoriteSitesGroupsCount(themeDisplay.getUserId(), searchKeywords);
+	groups = SitesUtil.getFavoriteSitesGroups(themeDisplay.getUserId(), keywords, 0, maxResultSize);
+	groupsCount = SitesUtil.getFavoriteSitesGroupsCount(themeDisplay.getUserId(), keywords);
 }
 else {
-	groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), searchKeywords, false, 0, maxResultSize);
-	groupsCount = SitesUtil.getVisibleSitesCount(themeDisplay.getCompanyId(), themeDisplay.getUserId(), searchKeywords, false);
+	groups = SitesUtil.getVisibleSites(themeDisplay.getCompanyId(), themeDisplay.getUserId(), keywords, false, 0, maxResultSize);
+	groupsCount = SitesUtil.getVisibleSitesCount(themeDisplay.getCompanyId(), themeDisplay.getUserId(), keywords, false);
 }
 %>
 
@@ -74,155 +73,7 @@ else {
 		<div style="clear: both;"><!-- --></div>
 	</div>
 
-	<ul class="directory-list">
-
-		<%
-		boolean alternate = false;
-
-		for (Group group : groups) {
-			String classNames = StringPool.BLANK;
-
-			ExpandoBridge expandoBridge = group.getExpandoBridge();
-
-			if (SocialOfficeServiceUtil.isSocialOfficeGroup(group.getGroupId())) {
-				classNames += "social-office-enabled ";
-			}
-
-			boolean member = GroupLocalServiceUtil.hasUserGroup(themeDisplay.getUserId(), group.getGroupId());
-
-			if (member) {
-				classNames += "member ";
-			}
-
-			if (alternate) {
-				classNames += "alt";
-			}
-		%>
-
-			<li class="<%= classNames %>">
-				<c:choose>
-					<c:when test="<%= !FavoriteSiteLocalServiceUtil.isFavoriteSite(themeDisplay.getUserId(), group.getGroupId()) %>">
-						<span class="action favorite">
-							<liferay-portlet:actionURL name="updateFavorites" var="favoriteURL">
-								<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.ADD %>" />
-								<portlet:param name="redirect" value="<%= currentURL %>" />
-								<portlet:param name="portletResource" value="<%= portletResource %>" />
-								<portlet:param name="groupId" value="<%= String.valueOf(group.getGroupId()) %>" />
-							</liferay-portlet:actionURL>
-
-							<a class="favorite-site" href="<%= favoriteURL %>"><liferay-ui:message key="favorite" /></a>
-						</span>
-					</c:when>
-					<c:otherwise>
-						<span class="action unfavorite">
-							<liferay-portlet:actionURL name="updateFavorites" var="unfavoriteURL">
-								<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.DELETE %>" />
-								<portlet:param name="redirect" value="<%= currentURL %>" />
-								<portlet:param name="portletResource" value="<%= portletResource %>" />
-								<portlet:param name="groupId" value="<%= String.valueOf(group.getGroupId()) %>" />
-							</liferay-portlet:actionURL>
-
-							<a class="unfavorite-site" href="<%= unfavoriteURL %>"><liferay-ui:message key="unfavorite" /></a>
-						</span>
-					</c:otherwise>
-				</c:choose>
-
-				<c:choose>
-					<c:when test="<%= !member %>">
-						<c:choose>
-							<c:when test="<%= group.getType() == GroupConstants.TYPE_SITE_OPEN %>">
-								<span class="action join">
-									<liferay-portlet:actionURL portletName="<%= PortletKeys.SITE_MEMBERSHIPS_ADMIN %>" var="joinURL" windowState="<%= WindowState.NORMAL.toString() %>">
-										<portlet:param name="struts_action" value="/sites_admin/edit_site_assignments" />
-										<portlet:param name="<%= Constants.CMD %>" value="group_users" />
-										<portlet:param name="redirect" value="<%= currentURL %>" />
-										<portlet:param name="groupId" value="<%= String.valueOf(group.getGroupId()) %>" />
-										<portlet:param name="addUserIds" value="<%= String.valueOf(user.getUserId()) %>" />
-									</liferay-portlet:actionURL>
-
-									<a class="join-site" href="<%= joinURL %>"><liferay-ui:message key="join" /></a>
-								</span>
-							</c:when>
-							<c:when test="<%= group.getType() == GroupConstants.TYPE_SITE_RESTRICTED && !MembershipRequestLocalServiceUtil.hasMembershipRequest(user.getUserId(), group.getGroupId(), MembershipRequestConstants.STATUS_PENDING) %>">
-								<span class="action request">
-									<liferay-portlet:actionURL portletName="<%= PortletKeys.SITE_MEMBERSHIPS_ADMIN %>" var="membershipRequestURL" windowState="<%= WindowState.NORMAL.toString() %>">
-										<portlet:param name="struts_action" value="/sites_admin/post_membership_request" />
-										<portlet:param name="redirect" value="<%= currentURL %>" />
-										<portlet:param name="groupId" value="<%= String.valueOf(group.getGroupId()) %>" />
-										<portlet:param name="comments" value='<%= LanguageUtil.format(pageContext, "x-wishes-to-join-x", new String[] {user.getFullName(), group.getDescriptiveName(locale)}) %>' />
-									</liferay-portlet:actionURL>
-
-									<a class="request-site" href="<%= membershipRequestURL %>"><liferay-ui:message key="request-membership" /></a>
-								</span>
-							</c:when>
-							<c:when test="<%= MembershipRequestLocalServiceUtil.hasMembershipRequest(user.getUserId(), group.getGroupId(), MembershipRequestConstants.STATUS_PENDING) %>">
-								<span class="action requested">
-									<a><liferay-ui:message key="membership-requested" /></a>
-								</span>
-							</c:when>
-						</c:choose>
-					</c:when>
-					<c:otherwise>
-						<span class="action leave">
-							<liferay-portlet:actionURL portletName="<%= PortletKeys.SITE_MEMBERSHIPS_ADMIN %>" var="leaveURL" windowState="<%= WindowState.NORMAL.toString() %>">
-								<portlet:param name="struts_action" value="/sites_admin/edit_site_assignments" />
-								<portlet:param name="<%= Constants.CMD %>" value="group_users" />
-								<portlet:param name="redirect" value="<%= currentURL %>" />
-								<portlet:param name="groupId" value="<%= String.valueOf(group.getGroupId()) %>" />
-								<portlet:param name="removeUserIds" value="<%= String.valueOf(user.getUserId()) %>" />
-							</liferay-portlet:actionURL>
-
-							<a class="leave-site" href="<%= leaveURL %>"><liferay-ui:message key="leave" /></a>
-						</span>
-					</c:otherwise>
-				</c:choose>
-
-				<c:choose>
-					<c:when test="<%= GroupPermissionUtil.contains(permissionChecker, group.getGroupId(), ActionKeys.DELETE) %>">
-						<span class="action delete">
-							<liferay-portlet:actionURL portletName="<%= PortletKeys.SITES_ADMIN %>" var="deleteURL" windowState="<%= WindowState.NORMAL.toString() %>">
-								<portlet:param name="struts_action" value="/sites_admin/edit_site" />
-								<portlet:param name="<%= Constants.CMD %>" value="<%= Constants.DELETE %>" />
-								<portlet:param name="redirect" value="<%= currentURL %>" />
-								<portlet:param name="groupId" value="<%= String.valueOf(group.getGroupId()) %>" />
-							</liferay-portlet:actionURL>
-
-							<a class="delete-site" href="<%= deleteURL %>"><liferay-ui:message key="delete" /></a>
-						</span>
-					</c:when>
-					<c:otherwise>
-						<span class="action-not-allowed"></span>
-					</c:otherwise>
-				</c:choose>
-
-				<span class="name">
-					<c:choose>
-						<c:when test="<%= (group.hasPrivateLayouts() && member) || group.hasPublicLayouts() %>">
-							<liferay-portlet:actionURL portletName="<%= PortletKeys.SITE_REDIRECTOR %>" var="siteURL" windowState="<%= LiferayWindowState.NORMAL.toString() %>">
-								<portlet:param name="struts_action" value="/my_sites/view" />
-								<portlet:param name="groupId" value="<%= String.valueOf(group.getGroupId()) %>" />
-								<portlet:param name="privateLayout" value="<%= String.valueOf(!group.hasPublicLayouts()) %>" />
-							</liferay-portlet:actionURL>
-
-							<a href="<%= siteURL %>"><%= HtmlUtil.escape(group.getDescriptiveName(locale)) %></a>
-						</c:when>
-						<c:otherwise>
-							<%= HtmlUtil.escape(group.getDescriptiveName(locale)) %>
-						</c:otherwise>
-					</c:choose>
-				</span>
-
-				<span class="description">
-					<%= HtmlUtil.escape(group.getDescription()) %>
-				</span>
-			</li>
-
-		<%
-			alternate = !alternate;
-		}
-		%>
-
-	</ul>
+	<ul class="directory-list"></ul>
 
 	<aui:button-row>
 		<div class="directory-navigation buttons-left">
@@ -278,6 +129,8 @@ else {
 
 	Liferay.SO.Sites.createDirectoryList(directoryList);
 
+	directoryList.sendRequest();
+
 	var updateDirectoryList = function(event) {
 		var data = A.JSON.parse(event.data.responseText);
 
@@ -327,8 +180,28 @@ else {
 
 						var name = result.name;
 
-						if (result.url) {
-							name = '<a href="' + result.url + '">' + name + '</a>';
+						if (result.publicLayoutsURL) {
+							name = '<a href="' + result.publicLayoutsURL + '">' + name + '</a>';
+
+							if (result.privateLayoutsURL) {
+								name += '<a class="private-pages" href="' + result.privateLayoutsURL + '"> (<liferay-ui:message key="private-pages" />)</a>';
+							}
+						}
+						else if (!result.publicLayoutsURL && result.privateLayoutsURL) {
+							name = '<a href="' + result.privateLayoutsURL + '">' + name + '</a>';
+						}
+
+						var leaveHTML = '';
+
+						var leaveURLOnly = !result.joinUrl && !result.membershipRequested && !result.requestUrl;
+
+						if (leaveURLOnly) {
+							if (result.leaveURL) {
+								leaveHTML = '<span class="action leave"><a class="leave-site" href="' + result.leaveURL + '"><liferay-ui:message key="leave-site" /></a></span>';
+							}
+							else {
+								leaveHTML = '<span class="action leave" title="<liferay-ui:message key='you-cannot-leave-the-site-as-a-user-group-member-or-organization-member' />"><a class="disabled"></a></span>';
+							}
 						}
 
 						return A.Lang.sub(
@@ -337,7 +210,7 @@ else {
 								classNames: classNames.join(' '),
 								deleteHtml: (result.deleteURL ? '<span class="action delete"><a class="delete-site" href="' + result.deleteURL + '"><liferay-ui:message key="delete" /></a></span>' : '<span class="action-not-allowed"></span>'),
 								joinHtml: (result.joinUrl ? '<span class="action join"><a class="join-site" href="' + result.joinUrl + '"><liferay-ui:message key="join" /></a></span>' : ''),
-								leaveHtml: (result.leaveUrl ? '<span class="action leave"><a class="leave-site" href="' + result.leaveUrl + '"><liferay-ui:message key="leave" /></a></span>' : ''),
+								leaveHtml: leaveHTML,
 								requestHtml: (result.requestUrl ? '<span class="action request"><a class="request-site" href="' + result.requestUrl + '"><liferay-ui:message key="request-membership" /></a></span>' : ''),
 								requestedHtml: (result.membershipRequested ? '<span class="action requested"><a><liferay-ui:message key="membership-requested" /></a></span>' : ''),
 								siteDescription: result.description,

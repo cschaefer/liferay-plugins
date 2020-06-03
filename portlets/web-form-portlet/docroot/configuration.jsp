@@ -1,6 +1,6 @@
 <%--
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -19,22 +19,22 @@
 <%
 String redirect = ParamUtil.getString(renderRequest, "redirect");
 
-String titleXml = LocalizationUtil.getLocalizationXmlFromPreferences(preferences, renderRequest, "title");
-String descriptionXml = LocalizationUtil.getLocalizationXmlFromPreferences(preferences, renderRequest, "description");
-boolean requireCaptcha = GetterUtil.getBoolean(preferences.getValue("requireCaptcha", StringPool.BLANK));
-String successURL = preferences.getValue("successURL", StringPool.BLANK);
+String titleXml = LocalizationUtil.getLocalizationXmlFromPreferences(portletPreferences, renderRequest, "title");
+String descriptionXml = LocalizationUtil.getLocalizationXmlFromPreferences(portletPreferences, renderRequest, "description");
+boolean requireCaptcha = GetterUtil.getBoolean(portletPreferences.getValue("requireCaptcha", StringPool.BLANK));
+String successURL = portletPreferences.getValue("successURL", StringPool.BLANK);
 
-boolean sendAsEmail = GetterUtil.getBoolean(preferences.getValue("sendAsEmail", StringPool.BLANK));
-String emailFromName = WebFormUtil.getEmailFromName(preferences, company.getCompanyId());
-String emailFromAddress = WebFormUtil.getEmailFromAddress(preferences, company.getCompanyId());
-String emailAddress = preferences.getValue("emailAddress", StringPool.BLANK);
-String subject = preferences.getValue("subject", StringPool.BLANK);
+boolean sendAsEmail = GetterUtil.getBoolean(portletPreferences.getValue("sendAsEmail", StringPool.BLANK));
+String emailFromName = WebFormUtil.getEmailFromName(portletPreferences, company.getCompanyId());
+String emailFromAddress = WebFormUtil.getEmailFromAddress(portletPreferences, company.getCompanyId());
+String emailAddress = portletPreferences.getValue("emailAddress", StringPool.BLANK);
+String subject = portletPreferences.getValue("subject", StringPool.BLANK);
 
-boolean saveToDatabase = GetterUtil.getBoolean(preferences.getValue("saveToDatabase", StringPool.BLANK));
-String databaseTableName = preferences.getValue("databaseTableName", StringPool.BLANK);
+boolean saveToDatabase = GetterUtil.getBoolean(portletPreferences.getValue("saveToDatabase", StringPool.BLANK));
+String databaseTableName = portletPreferences.getValue("databaseTableName", StringPool.BLANK);
 
-boolean saveToFile = GetterUtil.getBoolean(preferences.getValue("saveToFile", StringPool.BLANK));
-String fileName = preferences.getValue("fileName", StringPool.BLANK);
+boolean saveToFile = GetterUtil.getBoolean(portletPreferences.getValue("saveToFile", StringPool.BLANK));
+String fileName = portletPreferences.getValue("fileName", StringPool.BLANK);
 
 boolean fieldsEditingDisabled = false;
 
@@ -99,7 +99,14 @@ if (WebFormUtil.getTableRowsCount(company.getCompanyId(), databaseTableName) > 0
 			<aui:fieldset cssClass="handle-data" label="file">
 				<aui:input name="preferences--saveToFile--" type="checkbox" value="<%= saveToFile %>" />
 
-				<aui:input cssClass="lfr-input-text-container" label="path-and-file-name" name="preferences--fileName--" value="<%= fileName %>" />
+				<c:choose>
+					<c:when test="<%= PortletPropsValues.DATA_FILE_PATH_CHANGEABLE %>">
+						<aui:input cssClass="lfr-input-text-container" label="path-and-file-name" name="preferences--fileName--" value="<%= fileName %>" />
+					</c:when>
+					<c:otherwise>
+						<liferay-ui:message arguments="<%= HtmlUtil.escape(WebFormUtil.getFileName(themeDisplay, portletResource)) %>" key="form-data-will-be-saved-to-x" />
+					</c:otherwise>
+				</c:choose>
 			</aui:fieldset>
 		</liferay-ui:panel>
 
@@ -150,7 +157,7 @@ if (WebFormUtil.getTableRowsCount(company.getCompanyId(), databaseTableName) > 0
 					formFieldsIndexes = new int[0];
 
 					for (int i = 1; true; i++) {
-						String fieldLabel = PrefsParamUtil.getString(preferences, request, "fieldLabel" + i);
+						String fieldLabel = PrefsParamUtil.getString(portletPreferences, request, "fieldLabel" + i);
 
 						if (Validator.isNull(fieldLabel)) {
 							break;

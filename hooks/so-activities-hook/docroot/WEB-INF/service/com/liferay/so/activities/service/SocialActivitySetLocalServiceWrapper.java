@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -273,39 +273,124 @@ public class SocialActivitySetLocalServiceWrapper
 	}
 
 	public com.liferay.so.activities.model.SocialActivitySet addActivitySet(
-		long userId, long activityId, java.lang.String className, long classPK,
-		int type)
+		long activityId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		return _socialActivitySetLocalService.addActivitySet(userId,
-			activityId, className, classPK, type);
+		return _socialActivitySetLocalService.addActivitySet(activityId);
 	}
 
-	public com.liferay.so.activities.model.SocialActivitySet decrementActivityCount(
-		long activitySetId)
+	public void decrementActivityCount(long activitySetId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		return _socialActivitySetLocalService.decrementActivityCount(activitySetId);
+		_socialActivitySetLocalService.decrementActivityCount(activitySetId);
 	}
 
-	public com.liferay.so.activities.model.SocialActivitySet deleteActivitySet(
-		long activitySetId)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _socialActivitySetLocalService.deleteActivitySet(activitySetId);
-	}
-
-	public com.liferay.so.activities.model.SocialActivitySet deleteActivitySet(
-		com.liferay.so.activities.model.SocialActivitySet activitySet)
+	public com.liferay.so.activities.model.SocialActivitySet getClassActivitySet(
+		long classNameId, long classPK, int type)
 		throws com.liferay.portal.kernel.exception.SystemException {
-		return _socialActivitySetLocalService.deleteActivitySet(activitySet);
+		return _socialActivitySetLocalService.getClassActivitySet(classNameId,
+			classPK, type);
 	}
 
-	public com.liferay.so.activities.model.SocialActivitySet incrementActivityCount(
-		long activitySetId)
+	public com.liferay.so.activities.model.SocialActivitySet getClassActivitySet(
+		long userId, long classNameId, long classPK, int type)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getClassActivitySet(userId,
+			classNameId, classPK, type);
+	}
+
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getGroupActivitySets(
+		long groupId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getGroupActivitySets(groupId,
+			start, end);
+	}
+
+	public int getGroupActivitySetsCount(long groupId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getGroupActivitySetsCount(groupId);
+	}
+
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getRelationActivitySets(
+		long userId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getRelationActivitySets(userId,
+			start, end);
+	}
+
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getRelationActivitySets(
+		long userId, int type, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getRelationActivitySets(userId,
+			type, start, end);
+	}
+
+	public int getRelationActivitySetsCount(long userId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getRelationActivitySetsCount(userId);
+	}
+
+	public int getRelationActivitySetsCount(long userId, int type)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getRelationActivitySetsCount(userId,
+			type);
+	}
+
+	public com.liferay.so.activities.model.SocialActivitySet getUserActivitySet(
+		long groupId, long userId, int type)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getUserActivitySet(groupId,
+			userId, type);
+	}
+
+	public com.liferay.so.activities.model.SocialActivitySet getUserActivitySet(
+		long groupId, long userId, long classNameId, int type)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getUserActivitySet(groupId,
+			userId, classNameId, type);
+	}
+
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getUserActivitySets(
+		long userId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getUserActivitySets(userId,
+			start, end);
+	}
+
+	public int getUserActivitySetsCount(long userId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getUserActivitySetsCount(userId);
+	}
+
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getUserGroupsActivitySets(
+		long userId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getUserGroupsActivitySets(userId,
+			start, end);
+	}
+
+	public int getUserGroupsActivitySetsCount(long userId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getUserGroupsActivitySetsCount(userId);
+	}
+
+	public java.util.List<com.liferay.so.activities.model.SocialActivitySet> getUserViewableActivitySets(
+		long userId, int start, int end)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getUserViewableActivitySets(userId,
+			start, end);
+	}
+
+	public int getUserViewableActivitySetsCount(long userId)
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _socialActivitySetLocalService.getUserViewableActivitySetsCount(userId);
+	}
+
+	public void incrementActivityCount(long activitySetId, long activityId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		return _socialActivitySetLocalService.incrementActivityCount(activitySetId);
+		_socialActivitySetLocalService.incrementActivityCount(activitySetId,
+			activityId);
 	}
 
 	/**

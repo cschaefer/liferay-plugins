@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -55,13 +55,6 @@ public class AppServiceWrapper implements AppService,
 		return _appService.invokeMethod(name, parameterTypes, arguments);
 	}
 
-	public com.liferay.marketplace.model.App addApp(long remoteAppId,
-		java.lang.String version, java.io.File file)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _appService.addApp(remoteAppId, version, file);
-	}
-
 	public com.liferay.marketplace.model.App deleteApp(long appId)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
@@ -80,11 +73,10 @@ public class AppServiceWrapper implements AppService,
 		_appService.uninstallApp(remoteAppId);
 	}
 
-	public com.liferay.marketplace.model.App updateApp(long appId,
-		java.lang.String version, java.io.File file)
+	public com.liferay.marketplace.model.App updateApp(java.io.File file)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		return _appService.updateApp(appId, version, file);
+		return _appService.updateApp(file);
 	}
 
 	/**

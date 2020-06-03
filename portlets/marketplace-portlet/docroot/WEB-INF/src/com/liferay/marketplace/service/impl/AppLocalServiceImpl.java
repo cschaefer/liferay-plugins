@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,10 @@
 
 package com.liferay.marketplace.service.impl;
 
+import com.liferay.compat.portal.kernel.util.StringUtil;
+import com.liferay.compat.portal.kernel.util.Time;
+import com.liferay.compat.portal.kernel.util.Validator;
+import com.liferay.marketplace.AppPropertiesException;
 import com.liferay.marketplace.AppVersionException;
 import com.liferay.marketplace.DuplicateAppException;
 import com.liferay.marketplace.model.App;
@@ -26,13 +30,11 @@ import com.liferay.portal.kernel.exception.SystemException;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.FileUtil;
+import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PropertiesUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.SystemProperties;
-import com.liferay.portal.kernel.util.Time;
-import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.CompanyConstants;
 import com.liferay.portal.model.User;
 import com.liferay.portlet.documentlibrary.NoSuchFileException;
@@ -42,6 +44,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -54,44 +57,6 @@ import java.util.zip.ZipFile;
  * @author Ryan Park
  */
 public class AppLocalServiceImpl extends AppLocalServiceBaseImpl {
-
-	public App addApp(long userId, long remoteAppId, String version, File file)
-		throws PortalException, SystemException {
-
-		// App
-
-		User user = userPersistence.fetchByPrimaryKey(userId);
-		Date now = new Date();
-
-		validate(remoteAppId, version);
-
-		long appId = counterLocalService.increment();
-
-		App app = appPersistence.create(appId);
-
-		if (user != null) {
-			app.setCompanyId(user.getCompanyId());
-			app.setUserId(user.getUserId());
-			app.setUserName(user.getFullName());
-		}
-
-		app.setCreateDate(now);
-		app.setModifiedDate(now);
-		app.setRemoteAppId(remoteAppId);
-		app.setVersion(version);
-
-		appPersistence.update(app, false);
-
-		// File
-
-		if (file != null) {
-			DLStoreUtil.addFile(
-				app.getCompanyId(), CompanyConstants.SYSTEM, app.getFilePath(),
-				false, file);
-		}
-
-		return app;
-	}
 
 	@Override
 	public App deleteApp(App app) throws SystemException {
@@ -132,6 +97,21 @@ public class AppLocalServiceImpl extends AppLocalServiceBaseImpl {
 
 	public App fetchRemoteApp(long remoteAppId) throws SystemException {
 		return appPersistence.fetchByRemoteAppId(remoteAppId);
+	}
+
+	@Override
+	public List<App> getInstalledApps() throws SystemException {
+		List<App> installedApps = new ArrayList<App>();
+
+		List<App> apps = appPersistence.findAll();
+
+		for (App app : apps) {
+			if (app.isInstalled()) {
+				installedApps.add(app);
+			}
+		}
+
+		return installedApps;
 	}
 
 	public void installApp(long remoteAppId)
@@ -297,16 +277,52 @@ public class AppLocalServiceImpl extends AppLocalServiceBaseImpl {
 		}
 	}
 
-	public App updateApp(long appId, String version, File file)
+	public App updateApp(long userId, File file)
+		throws PortalException, SystemException {
+
+		Properties properties = getMarketplaceProperties(file);
+
+		if (properties == null) {
+			throw new AppPropertiesException(
+				"Unable to read liferay-marketplace.properties");
+		}
+
+		long remoteAppId = GetterUtil.getLong(
+			properties.getProperty("remote-app-id"));
+		String version = properties.getProperty("version");
+
+		return updateApp(userId, remoteAppId, version, file);
+	}
+
+	public App updateApp(
+			long userId, long remoteAppId, String version, File file)
 		throws PortalException, SystemException {
 
 		// App
 
+		User user = userPersistence.fetchByPrimaryKey(userId);
+		Date now = new Date();
+
 		validate(0, version);
 
-		App app = appPersistence.findByPrimaryKey(appId);
+		App app = appPersistence.fetchByRemoteAppId(remoteAppId);
 
-		app.setModifiedDate(new Date());
+		if (app == null) {
+			long appId = counterLocalService.increment();
+
+			app = appPersistence.create(appId);
+
+			app.setCreateDate(now);
+			app.setRemoteAppId(remoteAppId);
+		}
+
+		if (user != null) {
+			app.setCompanyId(user.getCompanyId());
+			app.setUserId(user.getUserId());
+			app.setUserName(user.getFullName());
+		}
+
+		app.setModifiedDate(now);
 		app.setVersion(version);
 
 		appPersistence.update(app, false);
@@ -353,6 +369,38 @@ public class AppLocalServiceImpl extends AppLocalServiceBaseImpl {
 		}
 
 		return fileName;
+	}
+
+	protected Properties getMarketplaceProperties(File liferayPackageFile) {
+		InputStream inputStream = null;
+		ZipFile zipFile = null;
+
+		try {
+			zipFile = new ZipFile(liferayPackageFile);
+
+			ZipEntry zipEntry = zipFile.getEntry(
+				"liferay-marketplace.properties");
+
+			inputStream = zipFile.getInputStream(zipEntry);
+
+			String propertiesString = StringUtil.read(inputStream);
+
+			return PropertiesUtil.load(propertiesString);
+		}
+		catch (IOException ioe) {
+			return null;
+		}
+		finally {
+			if (zipFile != null) {
+				try {
+					zipFile.close();
+				}
+				catch (IOException ioe) {
+				}
+			}
+
+			StreamUtil.cleanUp(inputStream);
+		}
 	}
 
 	protected boolean hasDependentApp(Module module)

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,8 @@
 
 package com.liferay.webform.util;
 
+import com.liferay.compat.portal.kernel.util.StringUtil;
+import com.liferay.compat.portal.util.PortalUtil;
 import com.liferay.counter.service.CounterLocalServiceUtil;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.exception.SystemException;
@@ -22,9 +24,8 @@ import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.HtmlUtil;
 import com.liferay.portal.kernel.util.StringBundler;
 import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.util.Validator;
-import com.liferay.portal.util.PortalUtil;
+import com.liferay.portal.theme.ThemeDisplay;
 import com.liferay.portlet.expando.NoSuchTableException;
 import com.liferay.portlet.expando.model.ExpandoColumnConstants;
 import com.liferay.portlet.expando.model.ExpandoTable;
@@ -122,6 +123,23 @@ public class WebFormUtil {
 
 		return PortalUtil.getEmailFromName(
 			preferences, companyId, PortletPropsValues.EMAIL_FROM_NAME);
+	}
+
+	public static String getFileName(
+		ThemeDisplay themeDisplay, String portletId) {
+
+		StringBuffer sb = new StringBuffer(8);
+
+		sb.append(PortletPropsValues.DATA_ROOT_DIR);
+		sb.append(StringPool.FORWARD_SLASH);
+		sb.append(themeDisplay.getScopeGroupId());
+		sb.append(StringPool.FORWARD_SLASH);
+		sb.append(themeDisplay.getPlid());
+		sb.append(StringPool.FORWARD_SLASH);
+		sb.append(portletId);
+		sb.append(".csv");
+
+		return sb.toString();
 	}
 
 	public static String getNewDatabaseTableName(String portletId)

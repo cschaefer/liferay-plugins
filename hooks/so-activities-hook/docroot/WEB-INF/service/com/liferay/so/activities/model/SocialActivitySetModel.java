@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -208,6 +208,20 @@ public interface SocialActivitySetModel extends AttachedModel,
 	 * @param type the type of this social activity set
 	 */
 	public void setType(int type);
+
+	/**
+	 * Returns the extra data of this social activity set.
+	 *
+	 * @return the extra data of this social activity set
+	 */
+	public String getExtraData();
+
+	/**
+	 * Sets the extra data of this social activity set.
+	 *
+	 * @param extraData the extra data of this social activity set
+	 */
+	public void setExtraData(String extraData);
 
 	/**
 	 * Returns the activity count of this social activity set.

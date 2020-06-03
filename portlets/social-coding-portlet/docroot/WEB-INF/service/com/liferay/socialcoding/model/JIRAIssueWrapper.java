@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,7 @@
 
 package com.liferay.socialcoding.model;
 
+import com.liferay.portal.kernel.util.Validator;
 import com.liferay.portal.model.ModelWrapper;
 
 import java.util.Date;
@@ -49,7 +50,7 @@ public class JIRAIssueWrapper implements JIRAIssue, ModelWrapper<JIRAIssue> {
 		attributes.put("createDate", getCreateDate());
 		attributes.put("modifiedDate", getModifiedDate());
 		attributes.put("projectId", getProjectId());
-		attributes.put("key", getKey());
+		attributes.put("issueNumber", getIssueNumber());
 		attributes.put("summary", getSummary());
 		attributes.put("description", getDescription());
 		attributes.put("reporterJiraUserId", getReporterJiraUserId());
@@ -85,10 +86,10 @@ public class JIRAIssueWrapper implements JIRAIssue, ModelWrapper<JIRAIssue> {
 			setProjectId(projectId);
 		}
 
-		String key = (String)attributes.get("key");
+		Long issueNumber = (Long)attributes.get("issueNumber");
 
-		if (key != null) {
-			setKey(key);
+		if (issueNumber != null) {
+			setIssueNumber(issueNumber);
 		}
 
 		String summary = (String)attributes.get("summary");
@@ -219,21 +220,21 @@ public class JIRAIssueWrapper implements JIRAIssue, ModelWrapper<JIRAIssue> {
 	}
 
 	/**
-	* Returns the key of this j i r a issue.
+	* Returns the issue number of this j i r a issue.
 	*
-	* @return the key of this j i r a issue
+	* @return the issue number of this j i r a issue
 	*/
-	public java.lang.String getKey() {
-		return _jiraIssue.getKey();
+	public long getIssueNumber() {
+		return _jiraIssue.getIssueNumber();
 	}
 
 	/**
-	* Sets the key of this j i r a issue.
+	* Sets the issue number of this j i r a issue.
 	*
-	* @param key the key of this j i r a issue
+	* @param issueNumber the issue number of this j i r a issue
 	*/
-	public void setKey(java.lang.String key) {
-		_jiraIssue.setKey(key);
+	public void setIssueNumber(long issueNumber) {
+		_jiraIssue.setIssueNumber(issueNumber);
 	}
 
 	/**
@@ -419,6 +420,29 @@ public class JIRAIssueWrapper implements JIRAIssue, ModelWrapper<JIRAIssue> {
 	public void persist()
 		throws com.liferay.portal.kernel.exception.SystemException {
 		_jiraIssue.persist();
+	}
+
+	public java.lang.String getKey() {
+		return _jiraIssue.getKey();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+
+		if (!(obj instanceof JIRAIssueWrapper)) {
+			return false;
+		}
+
+		JIRAIssueWrapper jiraIssueWrapper = (JIRAIssueWrapper)obj;
+
+		if (Validator.equals(_jiraIssue, jiraIssueWrapper._jiraIssue)) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

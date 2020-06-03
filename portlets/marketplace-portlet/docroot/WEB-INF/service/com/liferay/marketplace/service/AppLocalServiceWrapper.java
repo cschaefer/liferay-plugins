@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2012 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-present Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -262,16 +262,14 @@ public class AppLocalServiceWrapper implements AppLocalService,
 		return _appLocalService.invokeMethod(name, parameterTypes, arguments);
 	}
 
-	public com.liferay.marketplace.model.App addApp(long userId,
-		long remoteAppId, java.lang.String version, java.io.File file)
-		throws com.liferay.portal.kernel.exception.PortalException,
-			com.liferay.portal.kernel.exception.SystemException {
-		return _appLocalService.addApp(userId, remoteAppId, version, file);
-	}
-
 	public com.liferay.marketplace.model.App fetchRemoteApp(long remoteAppId)
 		throws com.liferay.portal.kernel.exception.SystemException {
 		return _appLocalService.fetchRemoteApp(remoteAppId);
+	}
+
+	public java.util.List<com.liferay.marketplace.model.App> getInstalledApps()
+		throws com.liferay.portal.kernel.exception.SystemException {
+		return _appLocalService.getInstalledApps();
 	}
 
 	public void installApp(long remoteAppId)
@@ -292,11 +290,18 @@ public class AppLocalServiceWrapper implements AppLocalService,
 		_appLocalService.uninstallApp(remoteAppId);
 	}
 
-	public com.liferay.marketplace.model.App updateApp(long appId,
-		java.lang.String version, java.io.File file)
+	public com.liferay.marketplace.model.App updateApp(long userId,
+		java.io.File file)
 		throws com.liferay.portal.kernel.exception.PortalException,
 			com.liferay.portal.kernel.exception.SystemException {
-		return _appLocalService.updateApp(appId, version, file);
+		return _appLocalService.updateApp(userId, file);
+	}
+
+	public com.liferay.marketplace.model.App updateApp(long userId,
+		long remoteAppId, java.lang.String version, java.io.File file)
+		throws com.liferay.portal.kernel.exception.PortalException,
+			com.liferay.portal.kernel.exception.SystemException {
+		return _appLocalService.updateApp(userId, remoteAppId, version, file);
 	}
 
 	/**

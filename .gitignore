@@ -4,10 +4,12 @@
 *.iml
 *.ipr
 *.iws
+*.processed
 *.swp
 .ant_targets
 .ant-targets-build.xml
-.sass-cache/
+.ivy
+.sass-cache
 .sass_cache_*.css
 _sass_cache_*.css
 
@@ -24,5 +26,12 @@ _sass_cache_*.css
 
 /build.*.properties
 /dist
-/lib
+
+/themes/*/docroot/css
+/themes/*/docroot/images
+/themes/*/docroot/js
+/themes/*/docroot/layouttpl
+/themes/*/docroot/templates
+/themes/*/docroot/WEB-INF/lib
+
 /tools/*/*/*/lib

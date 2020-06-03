@@ -4,6 +4,26 @@
 <project name="build-common-plugins" xmlns:antelope="antlib:ise.antelope.tasks">
 	<import file="build-common.xml" />
 
+	<if>
+		<equals arg1="${basedir}" arg2="${user.dir}" />
+		<then>
+			<property name="plugin.type.dir" value=".." />
+		</then>
+		<else>
+			<property name="plugin.type.dir" value="${basedir}" />
+		</else>
+	</if>
+
+	<target name="build-db">
+		<antcall target="loop-modules">
+			<param name="loop.modules.cmd" value="build-db-module" />
+		</antcall>
+	</target>
+
+	<target name="build-db-module">
+		<ant dir="${module.name}" target="build-db" inheritAll="false" />
+	</target>
+
 	<target name="build-service">
 		<for param="service.file">
 			<path>
